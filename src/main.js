@@ -1,7 +1,7 @@
-import { ROWS, COLS, KEY, MOVES } from './constants'
+import { ROWS, COLS, KEY } from './constants'
 import { createFragment } from './utils'
-import './styles.css'
 import { Board } from './board'
+import './styles.css'
 
 // setup
 document.documentElement.style.setProperty('--number-of-rows', ROWS)
@@ -33,7 +33,22 @@ const tetrisTemplate = (boardTemplate) => {
 
 const gameLoop = (now = 0) => {
     if (now - startTime > 1000) {
-        board.advanceFrame()
+        const nextPosition = board.getNextPosition(KEY.DOWN)
+        if (board.isValidPosition(nextPosition)) {
+            board.movePiece(nextPosition)
+        } else {
+            console.log('update board -> clearLines -> draw a new random piece')
+
+            board.updateBoard()
+            board.clearLines()
+            // check if game is over
+            /* if (this.piece.y === 0) {
+                // Game over
+                return false;
+            } */
+            // start a new piece
+            board.updatePieces()
+        }
 
         // refresh board
         const b = board.drawBoard()
@@ -57,10 +72,15 @@ const run = (rootEl, htmlFragment) => {
     if (playBtn) {
         playBtn.addEventListener('click', function onPlayClicked(event) {
 
-            // render random piece at the top of the board
-            board.start()
+            // set active piece and next piece
+            board.updatePieces()
 
-            gameLoop()
+            // refresh board
+            const b = board.drawBoard()
+            root.getElementsByClassName('grid')[0].outerHTML = b
+
+            // dely game loop with 1 second
+            setTimeout(gameLoop, 1000);
         })
     }
 
@@ -87,6 +107,10 @@ const run = (rootEl, htmlFragment) => {
 
         if (board.isValidPosition(nextPosition)) {
             board.movePiece(nextPosition)
+
+            // refresh board
+            const b = board.drawBoard()
+            root.getElementsByClassName('grid')[0].outerHTML = b
         } else {
             console.log('invalid position', nextPosition)
         }

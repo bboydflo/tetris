@@ -1,5 +1,5 @@
 import { ROTATION, ROWS, COLS, KEY } from './constants'
-import { Piece } from './piece'
+import { Piece, rotatePiece } from './piece'
 
 export class Board {
     constructor() {
@@ -11,6 +11,8 @@ export class Board {
     }
 
     reset() {
+        this.piece = null
+        this.nextPiece = null
         this.grid = this.getEmptyBoard()
     }
 
@@ -28,7 +30,7 @@ export class Board {
 
                             // limits
                             if (innerX >= 0 && innerY >= 0 && innerX < this.piece.shape.length && innerY < this.piece.shape.length) {
-                                if (this.piece.shape[innerY][innerX] > 0) {
+                                if (this.piece.shape[innerY][innerX] !== 0) {
                                     v = this.piece.shape[innerY][innerX]
                                 }
                             }
@@ -46,26 +48,33 @@ export class Board {
         `
     }
 
-    start() {
-        this.piece = new Piece({
-            grid: this.grid,
-            x: COLS / 2 - 1,
-            y: -1
-        })
-    }
-
-    advanceFrame() {
-        this.piece.move(KEY.DOWN)
+    updatePieces() {
+        if (this.nextPiece) {
+            this.piece = this.nextPiece
+            this.nextPiece = new Piece({
+                x: COLS / 2 - 1,
+                y: 0
+            })
+        } else {
+            this.piece = new Piece({
+                x: COLS / 2 - 1,
+                y: 0
+            })
+            this.nextPiece = new Piece({
+                x: COLS / 2 - 1,
+                y: 0
+            })
+        }
     }
 
     getNextPosition(key) {
         let p = this.piece.clone()
         switch (key) {
             case KEY.UP:
-                p = this.piece.rotate(p, ROTATION.RIGHT)
+                p = rotatePiece(p, ROTATION.RIGHT)
                 break
             case KEY.Q:
-                p = this.piece.rotate(p, ROTATION.LEFT)
+                p = rotatePiece(p, ROTATION.LEFT)
                 break
             case KEY.DOWN:
                 p.y += 1
@@ -82,72 +91,74 @@ export class Board {
 
     isValidPosition(p) {
 
-        /* return p.shape.every((row, dy) => {
-            return row.every((value, dx) => {
-                let x = p.x + dx;
-                let y = p.y + dy;
-                return (
-                    value === 0 ||
-                    (this.insideWalls(x) && this.aboveFloor(y) && this.notOccupied(x, y))
-                );
-            });
-        }) */
+        /**
+         * every point of the shape needs to within the walls
+         * of the board, needs to be above the floor
+         * and also needs to fill an empty spot on the board
+         */
+        return p.shape.every((row, rowIndex) => {
+            return row.every((value, colIndex) => {
 
-        // is inside the walls
-        if (p.x < 0 || p.x + p.shape.length > COLS) {
-            console.log('is not inside walls', p)
-            return false
-        }
+                const x = p.x + colIndex
+                const y = p.y + rowIndex
 
-        // is above the floor
-        if (p.y < 0) {
-            console.log('is not above floor', p)
-            return false
-        }
+                // non empty shape value needs to be within the walls
+                if (value > 0 && (x < 0 || x >= COLS)) {
+                    console.warn(`(${y}, ${x}) is not within the walls`)
+                    return false
+                }
 
-        // not occupied
-        const isOccupied = p.shape.reduce((acc, curr, rowIndex) => {
-            if (!acc) {
-                acc = curr.reduce((acc1, curr1, colIndex) => {
-                    if (!acc1 && curr1) {
-                        acc1 = /* p.shape[rowIndex][colIndex] > 0 &&  */ this.grid[p.x + rowIndex - 1][p.y + colIndex - 1] !== 0
-                        if (acc1) {
-                            console.warn({
-                                x: p.x,
-                                y: p.y,
-                                rowIndex, colIndex,
-                                cell: this.grid[p.x + rowIndex][p.y + colIndex]})
-                        }
-                    }
-                    return acc1
-                }, false)
-            }
-            return acc
-        }, false)
+                // non empty shape value needs to be above the floor
+                if (value > 0 && y >= ROWS) {
+                    console.warn(`(${y}, ${x}) not above the floor`)
+                    return false
+                }
 
-        if (isOccupied) {
-            console.log('is occupied', p)
-            return false
-        }
+                // non empty shape value needs to fill in an empty spot in the grid
+                if (value > 0 && this.grid[y] && this.grid[y][x] > 0) {
+                    console.warn(`point (${y}, ${x}) is already filed with value ${this.grid[y][x]}`)
+                    return false
+                }
 
-        return true
-    }
-
-    insideWalls(x) {
-        return x >= 0 && x < COLS;
-    }
-
-    aboveFloor(y) {
-        return y <= ROWS;
-    }
-
-    notOccupied(x, y) {
-        return this.grid[y] && this.grid[y][x] === 0;
+                return true
+            })
+        })
     }
 
     movePiece(p) {
         this.piece.x = p.x
         this.piece.y = p.y
         this.piece.shape = p.shape
+    }
+
+    updateBoard() {
+        this.piece.shape.map((row, rowIndex) => {
+            row.map((value, colIndex) => {
+                if (value > 0) {
+                    this.grid[this.piece.y + rowIndex][this.piece.x + colIndex] = value
+                }
+            })
+        })
+    }
+
+    clearLines() {
+        let lines = 0
+
+        /**
+         * clear all lines that have all values > 0
+         */
+        this.grid.forEach((row, rowIndex) => {
+            if (row.every(value => value > 0)) {
+                lines += 1
+
+                // clear the line
+                this.grid.splice(rowIndex, 1)
+
+                // add new empty line at the beginning
+                this.grid.unshift(Array.from({ length: COLS }).fill(0))
+            }
+        })
+
+        return lines
     }
 }

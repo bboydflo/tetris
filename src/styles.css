@@ -30,6 +30,11 @@ html {
     width: 20px;
     height: 20px;
 }
+/* uncomment this to see an entire piece including empty spaces */
+/* .cell--1 {
+    background-color: rgba(160, 207, 250, 0.575);
+    opacity: 0.75;
+} */
 .cell-0 {
     background-color: white;
 }
