@@ -1,1 +1,81 @@
+html {
+    /* Will be overridden by JS */
+    --number-of-rows: 20;
+    --number-of-columns: 10;
+}
+
+.tetris {
+    max-width: 50%;
+    display: flex;
+}
+
+.board {
+    outline: 2px solid;
+    display: inline-flex;
+}
+
+.grid {
+    box-sizing: border-box;
+    display: inline-grid;
+    grid-template-columns: repeat(var(--number-of-columns), 1fr);
+    grid-auto-flow: row;
+    gap: 2px;
+}
+
+.cell {
+    display: flex;
+    justify-content: center;
+    align-self: center;
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+}
+.cell-0 {
+    background-color: white;
+}
+.cell-1 {
+    background-color: cyan;
+}
+.cell-2 {
+    background-color: blue;
+}
+.cell-3 {
+    background-color: orange;
+}
+.cell-4 {
+    background-color: yellow;
+}
+.cell-5 {
+    background-color: green;
+}
+.cell-6 {
+    background-color: purple;
+}
+.cell-7 {
+    background-color: red;
+}
+
+.controls {
+    min-width: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.play {
+    display: inline-block;
+    background: none;
+    color: #e44a4a;
+    border: 1px solid #e44a4a;
+    padding: 0.5em 1em;
+    text-align: center;
+    border-radius: 4px;
+    transition: color 200ms ease-in, background-color 200ms ease-in;
+    text-transform: capitalize;
+}
+.play:hover {
+    color: white;
+    background-color: #e44a4a;
+    border: white;
+}
 
