@@ -5,13 +5,14 @@ html {
 }
 
 .tetris {
-    max-width: 50%;
+    width: 50%;
+    margin: 0 auto;
     display: flex;
 }
 
 .board {
     outline: 2px solid;
-    display: inline-flex;
+    display: inline-block;
 }
 
 .grid {
@@ -27,8 +28,8 @@ html {
     justify-content: center;
     align-self: center;
     box-sizing: border-box;
-    width: 20px;
-    height: 20px;
+    width: 1.25rem;
+    height: 1.25rem;
 }
 /* uncomment this to see an entire piece including empty spaces */
 /* .cell--1 {
@@ -60,27 +61,45 @@ html {
     background-color: red;
 }
 
-.controls {
-    min-width: 30%;
+.board-info {
+    padding: 1rem;
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: center;
+    width: 100%;
+    max-width: 25rem;
+}
+.score {
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+.score-value {
+    display: inline-block;
+    padding: 0 0.25rem;
+    font-weight: 700;
+}
+.controls {
+    width: 100%;
+    margin: 0 auto;
 }
 
 .play {
-    display: inline-block;
+    margin-top: 0.5rem;
+    display: block;
+    cursor: pointer;
+    width: 100%;
     background: none;
     color: #e44a4a;
     border: 1px solid #e44a4a;
     padding: 0.5em 1em;
     text-align: center;
     border-radius: 4px;
-    transition: color 200ms ease-in, background-color 200ms ease-in;
+    transition: color 150ms ease-in, background-color 150ms ease-in;
     text-transform: capitalize;
 }
 .play:hover {
     color: white;
     background-color: #e44a4a;
-    border: white;
 }
 

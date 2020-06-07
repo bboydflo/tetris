@@ -1,4 +1,4 @@
-import { ROTATION, ROWS, COLS, KEY } from './constants'
+import { ROWS, COLS, KEY, ROTATION, POINTS } from './constants'
 import { Piece, rotatePiece } from './piece'
 
 export class Board {
@@ -161,4 +161,31 @@ export class Board {
 
         return lines
     }
+
+    isGameOver() {
+        return this.piece.y === 0
+    }
+}
+
+export const getPoints = (numberOfLines, level = 1)  => {
+    let points = 0
+    switch(numberOfLines) {
+        case 1:
+            points = POINTS.SINGLE
+            break
+        case 2:
+            points = POINTS.DOUBLE
+            break
+        case 3:
+            points = POINTS.TRIPLE
+            break
+        case 4:
+            points = POINTS.TETRIS
+            break
+        default:
+            points = 0
+            break
+    }
+
+    return level * points;
 }

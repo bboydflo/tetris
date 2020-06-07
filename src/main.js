@@ -1,6 +1,6 @@
 import { ROWS, COLS, KEY } from './constants'
 import { createFragment } from './utils'
-import { Board } from './board'
+import { Board, getPoints } from './board'
 import './styles.css'
 
 // setup
@@ -9,6 +9,7 @@ document.documentElement.style.setProperty('--number-of-columns', COLS)
 
 // request animation frame setup
 let gameOver = false
+let gameScore = 0
 let requestId = 0
 let startTime = performance.now()
 
@@ -18,14 +19,17 @@ const root = document.getElementById('root')
 // create new board
 const board = new Board()
 
-const tetrisTemplate = (boardTemplate) => {
+const tetrisTemplate = (boardTemplate, score = 0) => {
     return `
         <div class="tetris">
             <div class="board">
                 ${boardTemplate}
             </div>
-            <div class="controls">
-                <button class="play">play</button>
+            <div class="board-info">
+                <p class="score">Score: <span class="score-value">${score}</span></p>
+                <div class="controls">
+                    <button class="play">play</button>
+                </div>
             </div>
         </div>
     `
@@ -40,12 +44,18 @@ const gameLoop = (now = 0) => {
             console.log('update board -> clearLines -> draw a new random piece')
 
             board.updateBoard()
-            board.clearLines()
+            const clearedLines = board.clearLines()
+            // update score
+            gameScore += getPoints(clearedLines)
+
             // check if game is over
-            /* if (this.piece.y === 0) {
-                // Game over
-                return false;
-            } */
+            if (board.isGameOver()) {
+                gameOver = true
+                cancelAnimationFrame(requestId)
+
+                return console.log('game is over. total score = ', gameScore)
+            }
+
             // start a new piece
             board.updatePieces()
         }
@@ -53,6 +63,9 @@ const gameLoop = (now = 0) => {
         // refresh board
         const b = board.drawBoard()
         root.getElementsByClassName('grid')[0].outerHTML = b
+        // refresh score
+        const scoreValue$ = root.getElementsByClassName('score-value')[0]
+        scoreValue$.innerHTML = gameScore
 
         startTime = now
     }
