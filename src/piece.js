@@ -13,14 +13,6 @@ export class Piece {
         return Math.floor(Math.random() * COLORS.length);
     }
 
-    move(key) {
-        switch (key) {
-            case KEY.DOWN:
-                this.y += 1
-                break
-        }
-    }
-
     setPosition(x, y) {
         this.x = x
         this.y = y

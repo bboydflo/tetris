@@ -7,14 +7,10 @@ import './styles.css'
 document.documentElement.style.setProperty('--number-of-rows', ROWS)
 document.documentElement.style.setProperty('--number-of-columns', COLS)
 
-// request animation frame setup
 let gameOver = false
 let gameScore = 0
 let requestId = 0
 let startTime = performance.now()
-
-// get root element
-const root = document.getElementById('root')
 
 // create new board
 const board = new Board()
@@ -41,11 +37,10 @@ const gameLoop = (now = 0) => {
         if (board.isValidPosition(nextPosition)) {
             board.movePiece(nextPosition)
         } else {
-            console.log('update board -> clearLines -> draw a new random piece')
-
             board.updateBoard()
-            const clearedLines = board.clearLines()
+
             // update score
+            const clearedLines = board.clearLines()
             gameScore += getPoints(clearedLines)
 
             // check if game is over
@@ -56,13 +51,14 @@ const gameLoop = (now = 0) => {
                 return console.log('game is over. total score = ', gameScore)
             }
 
-            // start a new piece
+            // update current and next piece
             board.updatePieces()
         }
 
         // refresh board
         const b = board.drawBoard()
         root.getElementsByClassName('grid')[0].outerHTML = b
+
         // refresh score
         const scoreValue$ = root.getElementsByClassName('score-value')[0]
         scoreValue$.innerHTML = gameScore
@@ -71,10 +67,6 @@ const gameLoop = (now = 0) => {
     }
 
     requestId = requestAnimationFrame(gameLoop)
-
-    /* return () => {
-        cancelAnimationFrame(requestId)
-    } */
 }
 
 const run = (rootEl, htmlFragment) => {
@@ -85,7 +77,7 @@ const run = (rootEl, htmlFragment) => {
     if (playBtn) {
         playBtn.addEventListener('click', function onPlayClicked(event) {
 
-            // set active piece and next piece
+            // update current and next piece
             board.updatePieces()
 
             // refresh board
@@ -127,32 +119,11 @@ const run = (rootEl, htmlFragment) => {
         } else {
             console.log('invalid position', nextPosition)
         }
-
-        /* if (MOVES[event.keyCode]) {
-            event.preventDefault()
-            // Get new state
-            let p = MOVES[event.keyCode](board.piece)
-            if (event.keyCode === KEY.SPACE) {
-                // Hard drop
-                while (board.valid(p)) {
-                    account.score += POINTS.HARD_DROP
-                    board.piece.move(p)
-                    p = MOVES[KEY.DOWN](board.piece)
-                }
-                board.piece.hardDrop()
-            } else if (board.valid(p)) {
-                board.piece.move(p)
-                if (event.keyCode === KEY.DOWN) {
-                    account.score += POINTS.SOFT_DROP
-                }
-            }
-        } */
     })
 }
 
-// build page fragment
-const pageFragment = createFragment(tetrisTemplate(board.drawBoard()))
-
+const root = document.getElementById('root')
 if (root) {
+    const pageFragment = createFragment(tetrisTemplate(board.drawBoard()))
     run(root, pageFragment)
 }
