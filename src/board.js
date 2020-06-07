@@ -30,7 +30,7 @@ export class Board {
 
                             // limits
                             if (innerX >= 0 && innerY >= 0 && innerX < this.piece.shape.length && innerY < this.piece.shape.length) {
-                                if (this.piece.shape[innerY][innerX] !== 0) {
+                                if (this.piece.shape[innerY][innerX] > 0) {
                                     v = this.piece.shape[innerY][innerX]
                                 }
                             }
