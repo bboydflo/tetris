@@ -12,7 +12,10 @@ export class Board {
 
     reset() {
         this.piece = null
-        this.nextPiece = null
+        this.nextPiece = new Piece({
+            x: COLS / 2 - 1,
+            y: 0
+        })
         this.grid = this.getEmptyBoard()
     }
 
@@ -48,6 +51,23 @@ export class Board {
         `
     }
 
+    drawNextPiece() {
+        const pieceSize = this.nextPiece.shape.length
+
+        const cells = this.nextPiece.shape
+            .map((rows, rowIndex) => {
+                return rows
+                    .map((v, colIndex) => {
+                        return `<span class="cell cell-${v} row-${rowIndex} col-${colIndex}"></span>`
+                    })
+                    .join('')
+            })
+            .join('')
+        return `
+            <div class="grid-${pieceSize}">${cells}</div>
+        `
+    }
+
     updatePieces() {
         if (this.nextPiece) {
             this.piece = this.nextPiece
@@ -65,6 +85,10 @@ export class Board {
                 y: 0
             })
         }
+    }
+
+    getNextPiece() {
+        return this.nextPiece
     }
 
     getNextPosition(key) {

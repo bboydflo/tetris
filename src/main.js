@@ -15,7 +15,7 @@ let startTime = performance.now()
 // create new board
 const board = new Board()
 
-const tetrisTemplate = (boardTemplate, score = 0) => {
+const tetrisTemplate = (boardTemplate, nextPiece = '', score = 0) => {
     return `
         <div class="tetris">
             <div class="board">
@@ -26,6 +26,7 @@ const tetrisTemplate = (boardTemplate, score = 0) => {
                 <div class="controls">
                     <button class="play">play</button>
                 </div>
+                <div class="nextPiece">${nextPiece}</div>
             </div>
         </div>
     `
@@ -53,6 +54,10 @@ const gameLoop = (now = 0) => {
 
             // update current and next piece
             board.updatePieces()
+
+            // get next piece and draw it on the side
+            const nextPieceHTML = board.drawNextPiece()
+            root.getElementsByClassName('nextPiece')[0].innerHTML = nextPieceHTML
         }
 
         // refresh board
@@ -60,8 +65,7 @@ const gameLoop = (now = 0) => {
         root.getElementsByClassName('grid')[0].outerHTML = b
 
         // refresh score
-        const scoreValue$ = root.getElementsByClassName('score-value')[0]
-        scoreValue$.innerHTML = gameScore
+        root.getElementsByClassName('score-value')[0].innerHTML = gameScore
 
         startTime = now
     }
@@ -75,7 +79,7 @@ const run = (rootEl, htmlFragment) => {
     // get play button
     const playBtn = document.getElementsByClassName('play')[0]
     if (playBtn) {
-        playBtn.addEventListener('click', function onPlayClicked(event) {
+        playBtn.addEventListener('click', function onPlayClicked() {
 
             // update current and next piece
             board.updatePieces()
@@ -83,6 +87,10 @@ const run = (rootEl, htmlFragment) => {
             // refresh board
             const b = board.drawBoard()
             root.getElementsByClassName('grid')[0].outerHTML = b
+
+            // get next piece and draw it on the side
+            const nextPieceHTML = board.drawNextPiece()
+            root.getElementsByClassName('nextPiece')[0].innerHTML = nextPieceHTML
 
             // dely game loop with 1 second
             setTimeout(gameLoop, 1000);
@@ -135,6 +143,6 @@ const run = (rootEl, htmlFragment) => {
 
 const root = document.getElementById('root')
 if (root) {
-    const pageFragment = createFragment(tetrisTemplate(board.drawBoard()))
+    const pageFragment = createFragment(tetrisTemplate(board.drawBoard(), board.drawNextPiece()))
     run(root, pageFragment)
 }

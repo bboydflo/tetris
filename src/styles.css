@@ -2,6 +2,10 @@ html {
     /* Will be overridden by JS */
     --number-of-rows: 20;
     --number-of-columns: 10;
+
+    --s-piece-length: 2;
+    --m-piece-length: 3;
+    --l-piece-length: 4;
 }
 
 .tetris {
@@ -19,6 +23,27 @@ html {
     box-sizing: border-box;
     display: inline-grid;
     grid-template-columns: repeat(var(--number-of-columns), 1fr);
+    grid-auto-flow: row;
+    gap: 2px;
+}
+.grid-2 {
+    box-sizing: border-box;
+    display: inline-grid;
+    grid-template-columns: repeat(var(--s-piece-length), 1fr);
+    grid-auto-flow: row;
+    gap: 2px;
+}
+.grid-3 {
+    box-sizing: border-box;
+    display: inline-grid;
+    grid-template-columns: repeat(var(--m-piece-length), 1fr);
+    grid-auto-flow: row;
+    gap: 2px;
+}
+.grid-4 {
+    box-sizing: border-box;
+    display: inline-grid;
+    grid-template-columns: repeat(var(--l-piece-length), 1fr);
     grid-auto-flow: row;
     gap: 2px;
 }
@@ -81,11 +106,15 @@ html {
 }
 .controls {
     width: 100%;
-    margin: 0 auto;
+    margin: 1rem auto;
+}
+.nextPiece {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .play {
-    margin-top: 0.5rem;
     display: block;
     cursor: pointer;
     width: 100%;
