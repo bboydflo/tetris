@@ -1,4 +1,4 @@
-import { ROWS, COLS, KEY } from './constants'
+import { KEY, ROWS, COLS, POINTS } from './constants'
 import { createFragment } from './utils'
 import { Board, getPoints } from './board'
 import './styles.css'
@@ -108,7 +108,18 @@ const run = (rootEl, htmlFragment) => {
             cancelAnimationFrame(requestId)
             return console.log('game over')
         }
-        const nextPosition = board.getNextPosition(event.keyCode)
+        let nextPosition = board.getNextPosition(event.keyCode)
+        if (event.keyCode === KEY.SPACE) {
+            while((board.isValidPosition(nextPosition))) {
+                gameScore += POINTS.HARD_DROP;
+                board.movePiece(nextPosition)
+                nextPosition = board.getNextPosition(KEY.DOWN)
+            }
+
+            // refresh board
+            const b = board.drawBoard()
+            return root.getElementsByClassName('grid')[0].outerHTML = b
+        }
 
         if (board.isValidPosition(nextPosition)) {
             board.movePiece(nextPosition)
@@ -117,7 +128,7 @@ const run = (rootEl, htmlFragment) => {
             const b = board.drawBoard()
             root.getElementsByClassName('grid')[0].outerHTML = b
         } else {
-            console.log('invalid position', nextPosition)
+            return console.log('invalid position', nextPosition)
         }
     })
 }
