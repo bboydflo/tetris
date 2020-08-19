@@ -10,7 +10,7 @@ export class Piece {
     }
 
     randomizeTetrominoType() {
-        return Math.floor(Math.random() * COLORS.length);
+        return Math.floor(Math.random() * COLORS.length)
     }
 
     setPosition(x, y) {
