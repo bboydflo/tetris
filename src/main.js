@@ -164,6 +164,3 @@ if (root) {
     const pageFragment = createFragment(tetrisTemplate(board.drawBoard(), board.drawNextPiece()))
     run(root, pageFragment)
 }
-
-//
-console.log(document.styleSheets[1].rules)
