@@ -13,7 +13,7 @@ let requestId = 0
 let startTime = performance.now()
 
 // create new board
-const board = new Board()
+let board = new Board()
 
 const tetrisTemplate = (boardTemplate, nextPiece = '', score = 0) => {
     return `
@@ -49,6 +49,10 @@ const gameLoop = (now = 0) => {
                 gameOver = true
                 cancelAnimationFrame(requestId)
 
+                gameScore = 0
+                board = new Board() // board.reset()
+                document.getElementsByClassName('play')[0].innerHTML = 'Reset'
+
                 return console.log('game is over. total score = ', gameScore)
             }
 
@@ -80,6 +84,20 @@ const run = (rootEl, htmlFragment) => {
     const playBtn = document.getElementsByClassName('play')[0]
     if (playBtn) {
         playBtn.addEventListener('click', function onPlayClicked() {
+            if (gameOver) {
+                board.reset()
+                this.innerHTML = 'Play'
+
+                gameScore = 0
+                const b = board.drawBoard()
+                root.getElementsByClassName('grid')[0].outerHTML = b
+                // refresh score
+                root.getElementsByClassName('score-value')[0].innerHTML = gameScore
+
+                gameOver = !gameOver
+
+                return
+            }
 
             // update current and next piece
             board.updatePieces()
@@ -93,7 +111,7 @@ const run = (rootEl, htmlFragment) => {
             root.getElementsByClassName('nextPiece')[0].innerHTML = nextPieceHTML
 
             // dely game loop with 1 second
-            setTimeout(gameLoop, 1000);
+            setTimeout(gameLoop, 1000)
         })
     }
 
@@ -119,7 +137,7 @@ const run = (rootEl, htmlFragment) => {
         let nextPosition = board.getNextPosition(event.keyCode)
         if (event.keyCode === KEY.SPACE) {
             while((board.isValidPosition(nextPosition))) {
-                gameScore += POINTS.HARD_DROP;
+                gameScore += POINTS.HARD_DROP
                 board.movePiece(nextPosition)
                 nextPosition = board.getNextPosition(KEY.DOWN)
             }

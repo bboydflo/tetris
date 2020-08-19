@@ -211,5 +211,5 @@ export const getPoints = (numberOfLines, level = 1)  => {
             break
     }
 
-    return level * points;
+    return level * points
 }
