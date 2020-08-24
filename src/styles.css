@@ -6,6 +6,8 @@ html {
     --s-piece-length: 2;
     --m-piece-length: 3;
     --l-piece-length: 4;
+
+    font-family: 'Press Start 2P';
 }
 
 .tetris {

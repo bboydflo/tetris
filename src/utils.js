@@ -7,3 +7,15 @@ export function createFragment(htmlStr) {
     }
     return frag
 }
+
+export function delegate(eventName, elementSelector, handler) {
+    document.addEventListener(eventName, function(e) {
+        // loop parent nodes from the target to the delegation node
+        for (let target = e.target; target && target != this; target = target.parentNode) {
+            if (target.matches(elementSelector)) {
+                handler.call(target, e);
+                break;
+            }
+        }
+    }, false);
+}

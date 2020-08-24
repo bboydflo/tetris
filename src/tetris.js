@@ -1,7 +1,7 @@
 import { ROWS, COLS, KEY, ROTATION, POINTS } from './constants'
 import { Piece, rotatePiece } from './piece'
 
-export class Board {
+export class Tetris {
     constructor() {
         this.reset()
     }
@@ -14,12 +14,37 @@ export class Board {
         this.piece = null
         this.nextPiece = new Piece({
             x: COLS / 2 - 1,
-            y: 0
+            y: -1
         })
         this.grid = this.getEmptyBoard()
+        this.score = 0
+        /**
+         * gameState can be -1 | 0 | 1
+         * 0 => reset
+         * 1 => not started
+         * 2 => in progress
+         * 3 => paused
+         */
+        this.gameState = 1
     }
 
-    drawBoard() {
+    start() {
+        /* this.piece = new Piece({
+            x: COLS / 2 - 1,
+            y: 0
+        })
+        this.nextPiece = new Piece({
+            x: COLS / 2 - 1,
+            y: 0
+        }) */
+        this.piece = this.nextPiece
+        this.nextPiece = new Piece({
+            x: COLS / 2 - 1,
+            y: -1
+        })
+    }
+
+    /* drawBoard() {
         const cells = this.grid
             .map((rows, rowIndex) => {
                 return rows
@@ -49,6 +74,15 @@ export class Board {
         return `
             <div class="grid">${cells}</div>
         `
+    } */
+    getState() {
+        return {
+            grid: this.grid,
+            score: this.score,
+            gameState: this.gameState,
+            currentPiece: this.piece,
+            nextPiece: this.nextPiece
+        }
     }
 
     drawNextPiece() {
@@ -109,6 +143,33 @@ export class Board {
             case KEY.LEFT:
                 p.x = p.x - 1
                 break
+            case KEY.SPACE:
+
+                // "move" piece down
+                // p.y += 1;
+
+                /* if (event.keyCode === KEY.SPACE) {
+                    while((board.isValidPosition(nextPosition))) {
+                        gameScore += POINTS.HARD_DROP
+                        board.movePiece(nextPosition)
+                        nextPosition = board.getNextPosition(KEY.DOWN)
+                    }
+
+                    // refresh board
+                    const b = board.drawBoard()
+                    return root.getElementsByClassName('grid')[0].outerHTML = b
+                } */
+
+                // "move" piece down
+                // p.y += 1;
+                while((this.isValidPosition(p))) {
+                    // update score
+                    this.score += POINTS.HARD_DROP
+                    // move piece down again
+                    p.y += 1;
+                }
+                p.y = p.y - 1
+                break
         }
         return p
     }
@@ -154,15 +215,19 @@ export class Board {
         this.piece.y = p.y
         this.piece.shape = p.shape
     }
-
-    updateBoard() {
+    updateCurrentPiece() {
         this.piece.shape.map((row, rowIndex) => {
             row.map((value, colIndex) => {
-                if (value > 0) {
+                if (value >= 0) {
                     this.grid[this.piece.y + rowIndex][this.piece.x + colIndex] = value
                 }
             })
         })
+    }
+
+    updateScore() {
+        const clearedLines = this.clearLines()
+        this.score += getPoints(clearedLines)
     }
 
     clearLines() {
@@ -189,9 +254,13 @@ export class Board {
     isGameOver() {
         return this.piece.y === 0
     }
+    exitGame() {
+        this.reset()
+        this.gameState = 0 // reset
+    }
 }
 
-export const getPoints = (numberOfLines, level = 1)  => {
+const getPoints = (numberOfLines, level = 1)  => {
     let points = 0
     switch(numberOfLines) {
         case 1:

@@ -1,32 +1,75 @@
 import { KEY, ROWS, COLS, POINTS } from './constants'
-import { createFragment } from './utils'
-import { Board, getPoints } from './board'
+import { createFragment, delegate } from './utils'
+import { Tetris } from './tetris'
 import './styles.css'
 
 // setup
 document.documentElement.style.setProperty('--number-of-rows', ROWS)
 document.documentElement.style.setProperty('--number-of-columns', COLS)
 
-let gameOver = false
-let gameScore = 0
+// let gameOver = false
+// let gameScore = 0
+const root = document.getElementById('root')
 let requestId = 0
 let startTime = performance.now()
 
 // create new board
-let board = new Board()
+const game = new Tetris()
 
-const tetrisTemplate = (boardTemplate, nextPiece = '', score = 0) => {
+const tetrisTemplate = (gameState) => {
+    const { score, grid, currentPiece, nextPiece } = gameState;
+
     return `
         <div class="tetris">
             <div class="board">
-                ${boardTemplate}
+                <div class="grid">
+                ${
+                    grid
+                        .map((rows, rowIndex) => {
+                            return rows
+                                .map((v, colIndex) => {
+
+                                    // does piece exist and it is in the viewport?
+                                    if (currentPiece && currentPiece.y >= 0) {
+
+                                        const innerX = colIndex - currentPiece.x
+                                        const innerY = rowIndex - currentPiece.y
+
+                                        // limits
+                                        if (innerX >= 0 && innerY >= 0 && innerX < currentPiece.shape.length && innerY < currentPiece.shape.length) {
+                                            if (currentPiece.shape[innerY][innerX] > 0) {
+                                                v = currentPiece.shape[innerY][innerX]
+                                            }
+                                        }
+                                    }
+
+                                    // return `<span class="cell cell-${v}"></span>`
+                                    return `<span class="cell cell-${v} row-${rowIndex} col-${colIndex}"></span>`
+                                })
+                                .join('')
+                        })
+                        .join('')
+                }
+                </div>
             </div>
             <div class="board-info">
                 <p class="score">Score: <span class="score-value">${score}</span></p>
                 <div class="controls">
                     <button class="play">play</button>
                 </div>
-                <div class="nextPiece">${nextPiece}</div>
+                <div class="nextPiece">
+                    <div class="grid-${nextPiece.shape.length}">${
+                        nextPiece.shape
+                            .map((rows, rowIndex) => {
+                                return rows
+                                    .map((v, colIndex) => {
+                                        return `<span class="cell cell-${v} row-${rowIndex} col-${colIndex}"></span>`
+                                    })
+                                    .join('')
+                            })
+                            .join('')}
+                    </div>
+                </div>
             </div>
         </div>
     `
@@ -34,42 +77,43 @@ const tetrisTemplate = (boardTemplate, nextPiece = '', score = 0) => {
 
 const gameLoop = (now = 0) => {
     if (now - startTime > 1000) {
-        const nextPosition = board.getNextPosition(KEY.DOWN)
-        if (board.isValidPosition(nextPosition)) {
-            board.movePiece(nextPosition)
+        const nextPosition = game.getNextPosition(KEY.DOWN)
+        if (game.isValidPosition(nextPosition)) {
+            game.movePiece(nextPosition)
         } else {
-            board.updateBoard()
+            game.updateCurrentPiece()
 
             // update score
-            const clearedLines = board.clearLines()
-            gameScore += getPoints(clearedLines)
+            game.updateScore()
 
             // check if game is over
-            if (board.isGameOver()) {
+            if (game.isGameOver()) {
                 gameOver = true
                 cancelAnimationFrame(requestId)
 
                 gameScore = 0
-                board = new Board() // board.reset()
+                // game = new Game()
+                game.reset()
                 document.getElementsByClassName('play')[0].innerHTML = 'Reset'
 
                 return console.log('game is over. total score = ', gameScore)
             }
 
             // update current and next piece
-            board.updatePieces()
+            game.updatePieces()
 
-            // get next piece and draw it on the side
-            const nextPieceHTML = board.drawNextPiece()
-            root.getElementsByClassName('nextPiece')[0].innerHTML = nextPieceHTML
+            /* // get next piece and draw it on the side
+            const nextPieceHTML = game.drawNextPiece()
+            root.getElementsByClassName('nextPiece')[0].innerHTML = nextPieceHTML */
         }
 
-        // refresh board
-        const b = board.drawBoard()
+        /* // refresh board
+        const b = game.drawBoard()
         root.getElementsByClassName('grid')[0].outerHTML = b
-
         // refresh score
-        root.getElementsByClassName('score-value')[0].innerHTML = gameScore
+        root.getElementsByClassName('score-value')[0].innerHTML = gameScore */
+
+        render(root, game)
 
         startTime = now
     }
@@ -85,11 +129,11 @@ const run = (rootEl, htmlFragment) => {
     if (playBtn) {
         playBtn.addEventListener('click', function onPlayClicked() {
             if (gameOver) {
-                board.reset()
+                game.reset()
                 this.innerHTML = 'Play'
 
                 gameScore = 0
-                const b = board.drawBoard()
+                const b = game.drawBoard()
                 root.getElementsByClassName('grid')[0].outerHTML = b
                 // refresh score
                 root.getElementsByClassName('score-value')[0].innerHTML = gameScore
@@ -100,14 +144,14 @@ const run = (rootEl, htmlFragment) => {
             }
 
             // update current and next piece
-            board.updatePieces()
+            game.updatePieces()
 
             // refresh board
-            const b = board.drawBoard()
+            const b = game.drawBoard()
             root.getElementsByClassName('grid')[0].outerHTML = b
 
             // get next piece and draw it on the side
-            const nextPieceHTML = board.drawNextPiece()
+            const nextPieceHTML = game.drawNextPiece()
             root.getElementsByClassName('nextPiece')[0].innerHTML = nextPieceHTML
 
             // dely game loop with 1 second
@@ -115,9 +159,28 @@ const run = (rootEl, htmlFragment) => {
         })
     }
 
-    // attach event listeners
-    document.addEventListener('keydown', event => {
-        if (gameOver) {
+
+}
+
+const render = (_root, _game) => {
+    const initialGameState = _game.getState()
+    // const pageFragment = createFragment(tetrisTemplate(initialGameState))
+    // _root.replaceChild(pageFragment, root.parentNode)
+    _root.innerHTML = tetrisTemplate(initialGameState)
+}
+
+if (root) {
+    /* const initialGameState = game.getState()
+    const pageFragment = createFragment(tetrisTemplate(initialGameState))
+    // run(root, pageFragment)
+    root.appendChild(pageFragment) */
+
+    // initial render
+    render(root, game)
+
+    delegate('keydown', 'body', function(event) {
+        const { isGameOver } = game.getState()
+        if (isGameOver) {
             return console.log('game is already over')
         }
         if (event.keyCode === KEY.P) {
@@ -130,37 +193,76 @@ const run = (rootEl, htmlFragment) => {
             return console.log('game paused')
         }
         if (event.keyCode === KEY.ESC) {
-            gameOver = true
+            game.exitGame()
             cancelAnimationFrame(requestId)
             return console.log('game over')
         }
-        let nextPosition = board.getNextPosition(event.keyCode)
-        if (event.keyCode === KEY.SPACE) {
-            while((board.isValidPosition(nextPosition))) {
-                gameScore += POINTS.HARD_DROP
-                board.movePiece(nextPosition)
-                nextPosition = board.getNextPosition(KEY.DOWN)
-            }
 
-            // refresh board
-            const b = board.drawBoard()
-            return root.getElementsByClassName('grid')[0].outerHTML = b
+        let nextPosition = game.getNextPosition(event.keyCode)
+        if (event.keyCode === KEY.SPACE || game.isValidPosition(nextPosition)) {
+            game.movePiece(nextPosition)
+            return render(root, game)
         }
+        return console.log('invalid position', nextPosition)
+    })
 
-        if (board.isValidPosition(nextPosition)) {
-            board.movePiece(nextPosition)
+    delegate('click', '.play', function(event) {
+        const { gameState } = game.getState()
 
-            // refresh board
-            const b = board.drawBoard()
-            root.getElementsByClassName('grid')[0].outerHTML = b
-        } else {
-            return console.log('invalid position', nextPosition)
+        if (gameState === 0) {
+            // reset
+        }
+        if (gameState === 1) {
+            game.start()
+            gameLoop()
+        }
+        if (gameState === 2) {
+            // pause
+        }
+        if (gameState === 3) {
+            // resume
         }
     })
-}
 
-const root = document.getElementById('root')
-if (root) {
-    const pageFragment = createFragment(tetrisTemplate(board.drawBoard(), board.drawNextPiece()))
-    run(root, pageFragment)
+    // attach event listeners
+    // document.addEventListener('keydown', event => )
+
+    // document.addEventListener('click', event => {
+    //     console.log(event.target);
+    // })
+
+    /* // get play button
+    const playBtn = document.getElementsByClassName('play')[0]
+    if (playBtn) {
+        playBtn.addEventListener('click', function onPlayClicked() {
+            if (gameOver) {
+                game.reset()
+                this.innerHTML = 'Play'
+
+                gameScore = 0
+                const b = game.drawBoard()
+                root.getElementsByClassName('grid')[0].outerHTML = b
+                // refresh score
+                root.getElementsByClassName('score-value')[0].innerHTML = gameScore
+
+                gameOver = !gameOver
+
+                return
+            }
+
+            // update current and next piece
+            game.updatePieces()
+
+            // refresh board
+            const b = game.drawBoard()
+            root.getElementsByClassName('grid')[0].outerHTML = b
+
+            // get next piece and draw it on the side
+            const nextPieceHTML = game.drawNextPiece()
+            root.getElementsByClassName('nextPiece')[0].innerHTML = nextPieceHTML
+
+            // dely game loop with 1 second
+            setTimeout(gameLoop, 1000)
+        })
+    } */
 }
