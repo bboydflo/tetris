@@ -1,4 +1,4 @@
-import { KEY, ROTATION, POINTS } from './constants'
+import { KEY, ROTATION } from './constants'
 import { Piece, rotatePiece } from './piece'
 
 export class Tetris {
@@ -193,6 +193,15 @@ export class Tetris {
         this.reset()
         this.gameState = 'reset'
     }
+}
+
+const POINTS = {
+    SINGLE: 100,
+    DOUBLE: 300,
+    TRIPLE: 500,
+    TETRIS: 800,
+    SOFT_DROP: 1,
+    HARD_DROP: 2,
 }
 
 const getPoints = (numberOfLines, level = 1)  => {
