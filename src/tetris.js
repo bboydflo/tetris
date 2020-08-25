@@ -1,19 +1,21 @@
-import { ROWS, COLS, KEY, ROTATION, POINTS } from './constants'
+import { KEY, ROTATION, POINTS } from './constants'
 import { Piece, rotatePiece } from './piece'
 
 export class Tetris {
-    constructor() {
+    constructor(rows, columns) {
+        this.rows = rows
+        this.columns = columns
         this.reset()
     }
 
     getEmptyBoard() {
-        return Array.from({ length: ROWS }, () => Array(COLS).fill(0))
+        return Array.from({ length: this.rows }, () => Array(this.columns).fill(0))
     }
 
     reset() {
         this.piece = null
         this.nextPiece = new Piece({
-            x: COLS / 2 - 1,
+            x: this.columns / 2 - 1,
             y: -1
         })
         this.grid = this.getEmptyBoard()
@@ -25,7 +27,7 @@ export class Tetris {
     start() {
         this.piece = this.nextPiece
         this.nextPiece = new Piece({
-            x: COLS / 2 - 1,
+            x: this.columns / 2 - 1,
             y: -1
         })
         this.gameState = 'in-progress'
@@ -57,16 +59,16 @@ export class Tetris {
         if (this.nextPiece) {
             this.piece = this.nextPiece
             this.nextPiece = new Piece({
-                x: COLS / 2 - 1,
+                x: this.columns / 2 - 1,
                 y: 0
             })
         } else {
             this.piece = new Piece({
-                x: COLS / 2 - 1,
+                x: this.columns / 2 - 1,
                 y: 0
             })
             this.nextPiece = new Piece({
-                x: COLS / 2 - 1,
+                x: this.columns / 2 - 1,
                 y: 0
             })
         }
@@ -119,13 +121,13 @@ export class Tetris {
                 const y = p.y + rowIndex
 
                 // non empty shape value needs to be within the walls
-                if (value > 0 && (x < 0 || x >= COLS)) {
+                if (value > 0 && (x < 0 || x >= this.columns)) {
                     console.warn(`(${y}, ${x}) is not within the walls`)
                     return false
                 }
 
                 // non empty shape value needs to be above the floor
-                if (value > 0 && y >= ROWS) {
+                if (value > 0 && y >= this.rows) {
                     console.warn(`(${y}, ${x}) not above the floor`)
                     return false
                 }
@@ -176,7 +178,7 @@ export class Tetris {
                 this.grid.splice(rowIndex, 1)
 
                 // add new empty line at the beginning
-                this.grid.unshift(Array.from({ length: COLS }).fill(0))
+                this.grid.unshift(Array.from({ length: this.columns }).fill(0))
             }
         })
 

@@ -7,7 +7,7 @@ import './styles.css'
 document.documentElement.style.setProperty('--number-of-rows', ROWS)
 document.documentElement.style.setProperty('--number-of-columns', COLS)
 
-const game = new Tetris()
+const game = new Tetris(ROWS, COLS)
 const root = document.getElementById('root')
 
 let requestId = 0
