@@ -18,63 +18,31 @@ export class Tetris {
         })
         this.grid = this.getEmptyBoard()
         this.score = 0
-        /**
-         * gameState can be -1 | 0 | 1
-         * 0 => reset
-         * 1 => not started
-         * 2 => in progress
-         * 3 => paused
-         */
-        this.gameState = 1
+        // ready | in-progress | paused | over
+        this.gameState = 'ready'
     }
 
     start() {
-        /* this.piece = new Piece({
-            x: COLS / 2 - 1,
-            y: 0
-        })
-        this.nextPiece = new Piece({
-            x: COLS / 2 - 1,
-            y: 0
-        }) */
         this.piece = this.nextPiece
         this.nextPiece = new Piece({
             x: COLS / 2 - 1,
             y: -1
         })
+        this.gameState = 'in-progress'
     }
 
-    /* drawBoard() {
-        const cells = this.grid
-            .map((rows, rowIndex) => {
-                return rows
-                    .map((v, colIndex) => {
+    pause() {
+        this.gameState = 'paused'
+    }
 
-                        // does piece exist and it is in the viewport?
-                        if (this.piece && this.piece.y >= 0) {
+    resume() {
+        this.gameState = 'in-progress'
+    }
 
-                            const innerX = colIndex - this.piece.x
-                            const innerY = rowIndex - this.piece.y
+    over() {
+        this.gameState = 'over'
+    }
 
-                            // limits
-                            if (innerX >= 0 && innerY >= 0 && innerX < this.piece.shape.length && innerY < this.piece.shape.length) {
-                                if (this.piece.shape[innerY][innerX] > 0) {
-                                    v = this.piece.shape[innerY][innerX]
-                                }
-                            }
-                        }
-
-                        // return `<span class="cell cell-${v}"></span>`
-                        return `<span class="cell cell-${v} row-${rowIndex} col-${colIndex}"></span>`
-                    })
-                    .join('')
-            })
-            .join('')
-
-        return `
-            <div class="grid">${cells}</div>
-        `
-    } */
     getState() {
         return {
             grid: this.grid,
@@ -83,23 +51,6 @@ export class Tetris {
             currentPiece: this.piece,
             nextPiece: this.nextPiece
         }
-    }
-
-    drawNextPiece() {
-        const pieceSize = this.nextPiece.shape.length
-
-        const cells = this.nextPiece.shape
-            .map((rows, rowIndex) => {
-                return rows
-                    .map((v, colIndex) => {
-                        return `<span class="cell cell-${v} row-${rowIndex} col-${colIndex}"></span>`
-                    })
-                    .join('')
-            })
-            .join('')
-        return `
-            <div class="grid-${pieceSize}">${cells}</div>
-        `
     }
 
     updatePieces() {
@@ -121,10 +72,6 @@ export class Tetris {
         }
     }
 
-    getNextPiece() {
-        return this.nextPiece
-    }
-
     getNextPosition(key) {
         let p = this.piece.clone()
         switch (key) {
@@ -144,31 +91,15 @@ export class Tetris {
                 p.x = p.x - 1
                 break
             case KEY.SPACE:
-
-                // "move" piece down
-                // p.y += 1;
-
-                /* if (event.keyCode === KEY.SPACE) {
-                    while((board.isValidPosition(nextPosition))) {
-                        gameScore += POINTS.HARD_DROP
-                        board.movePiece(nextPosition)
-                        nextPosition = board.getNextPosition(KEY.DOWN)
-                    }
-
-                    // refresh board
-                    const b = board.drawBoard()
-                    return root.getElementsByClassName('grid')[0].outerHTML = b
-                } */
-
-                // "move" piece down
-                // p.y += 1;
+                let isValidState = true
                 while((this.isValidPosition(p))) {
-                    // update score
                     this.score += POINTS.HARD_DROP
-                    // move piece down again
-                    p.y += 1;
+                    p.y += 1
+                    isValidState = false
                 }
-                p.y = p.y - 1
+                if (!isValidState) {
+                    p.y -= 1
+                }
                 break
         }
         return p
@@ -215,7 +146,8 @@ export class Tetris {
         this.piece.y = p.y
         this.piece.shape = p.shape
     }
-    updateCurrentPiece() {
+
+    setCurrentPiece() {
         this.piece.shape.map((row, rowIndex) => {
             row.map((value, colIndex) => {
                 if (value >= 0) {
@@ -254,9 +186,10 @@ export class Tetris {
     isGameOver() {
         return this.piece.y === 0
     }
+
     exitGame() {
         this.reset()
-        this.gameState = 0 // reset
+        this.gameState = 'reset'
     }
 }
 

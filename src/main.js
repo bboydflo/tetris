@@ -1,23 +1,30 @@
-import { KEY, ROWS, COLS, POINTS } from './constants'
-import { createFragment, delegate } from './utils'
+import { KEY, ROWS, COLS } from './constants'
+import { delegate } from './utils'
 import { Tetris } from './tetris'
 import './styles.css'
 
-// setup
+// grid setup
 document.documentElement.style.setProperty('--number-of-rows', ROWS)
 document.documentElement.style.setProperty('--number-of-columns', COLS)
 
-// let gameOver = false
-// let gameScore = 0
+const game = new Tetris()
 const root = document.getElementById('root')
+
 let requestId = 0
 let startTime = performance.now()
 
-// create new board
-const game = new Tetris()
-
-const tetrisTemplate = (gameState) => {
-    const { score, grid, currentPiece, nextPiece } = gameState;
+const tetrisTemplate = (state) => {
+    const { score, grid, currentPiece, nextPiece, gameState } = state
+    let playBtnLabel = 'Play'
+    if (gameState === 'in-progress') {
+        playBtnLabel = 'Pause'
+    }
+    if (gameState === 'paused') {
+        playBtnLabel = 'Resume'
+    }
+    if (gameState === 'over') {
+        playBtnLabel = 'Reset'
+    }
 
     return `
         <div class="tetris">
@@ -55,7 +62,7 @@ const tetrisTemplate = (gameState) => {
             <div class="board-info">
                 <p class="score">Score: <span class="score-value">${score}</span></p>
                 <div class="controls">
-                    <button class="play">play</button>
+                    <button class="play">${playBtnLabel}</button>
                 </div>
                 <div class="nextPiece">
                     <div class="grid-${nextPiece.shape.length}">${
@@ -81,121 +88,66 @@ const gameLoop = (now = 0) => {
         if (game.isValidPosition(nextPosition)) {
             game.movePiece(nextPosition)
         } else {
-            game.updateCurrentPiece()
+            game.setCurrentPiece()
 
-            // update score
             game.updateScore()
 
-            // check if game is over
             if (game.isGameOver()) {
-                gameOver = true
                 cancelAnimationFrame(requestId)
+                requestId = null
+            } else {
 
-                gameScore = 0
-                // game = new Game()
-                game.reset()
-                document.getElementsByClassName('play')[0].innerHTML = 'Reset'
-
-                return console.log('game is over. total score = ', gameScore)
+                // update current and next piece
+                game.updatePieces()
             }
-
-            // update current and next piece
-            game.updatePieces()
-
-            /* // get next piece and draw it on the side
-            const nextPieceHTML = game.drawNextPiece()
-            root.getElementsByClassName('nextPiece')[0].innerHTML = nextPieceHTML */
         }
 
-        /* // refresh board
-        const b = game.drawBoard()
-        root.getElementsByClassName('grid')[0].outerHTML = b
-        // refresh score
-        root.getElementsByClassName('score-value')[0].innerHTML = gameScore */
-
         render(root, game)
-
         startTime = now
     }
 
     requestId = requestAnimationFrame(gameLoop)
 }
 
-const run = (rootEl, htmlFragment) => {
-    rootEl.appendChild(htmlFragment)
-
-    // get play button
-    const playBtn = document.getElementsByClassName('play')[0]
-    if (playBtn) {
-        playBtn.addEventListener('click', function onPlayClicked() {
-            if (gameOver) {
-                game.reset()
-                this.innerHTML = 'Play'
-
-                gameScore = 0
-                const b = game.drawBoard()
-                root.getElementsByClassName('grid')[0].outerHTML = b
-                // refresh score
-                root.getElementsByClassName('score-value')[0].innerHTML = gameScore
-
-                gameOver = !gameOver
-
-                return
-            }
-
-            // update current and next piece
-            game.updatePieces()
-
-            // refresh board
-            const b = game.drawBoard()
-            root.getElementsByClassName('grid')[0].outerHTML = b
-
-            // get next piece and draw it on the side
-            const nextPieceHTML = game.drawNextPiece()
-            root.getElementsByClassName('nextPiece')[0].innerHTML = nextPieceHTML
-
-            // dely game loop with 1 second
-            setTimeout(gameLoop, 1000)
-        })
-    }
-
-
-}
-
 const render = (_root, _game) => {
     const initialGameState = _game.getState()
-    // const pageFragment = createFragment(tetrisTemplate(initialGameState))
-    // _root.replaceChild(pageFragment, root.parentNode)
     _root.innerHTML = tetrisTemplate(initialGameState)
 }
 
 if (root) {
-    /* const initialGameState = game.getState()
-    const pageFragment = createFragment(tetrisTemplate(initialGameState))
-    // run(root, pageFragment)
-    root.appendChild(pageFragment) */
 
     // initial render
     render(root, game)
 
+    // setup event handlers
     delegate('keydown', 'body', function(event) {
-        const { isGameOver } = game.getState()
-        if (isGameOver) {
+        const { isGameOver, gameState } = game.getState()
+        if (gameState === 'over' || isGameOver) {
             return console.log('game is already over')
         }
         if (event.keyCode === KEY.P) {
             if (!requestId) {
+                game.resume()
                 gameLoop()
-                return console.log('game restarted')
+            } else {
+                cancelAnimationFrame(requestId)
+                requestId = null
+                game.pause()
             }
-            cancelAnimationFrame(requestId)
-            requestId = null
-            return console.log('game paused')
+
+            return render(root, game)
         }
         if (event.keyCode === KEY.ESC) {
-            game.exitGame()
+            game.reset()
+            // game.over()
             cancelAnimationFrame(requestId)
-            return console.log('game over')
+            requestId = null
+
+            return render(root, game)
+        }
+
+        if (gameState === 'paused') {
+            return console.log('game is paused')
         }
 
         let nextPosition = game.getNextPosition(event.keyCode)
@@ -203,66 +155,28 @@ if (root) {
             game.movePiece(nextPosition)
             return render(root, game)
         }
-        return console.log('invalid position', nextPosition)
     })
-
     delegate('click', '.play', function(event) {
         const { gameState } = game.getState()
+        console.log('current state ', gameState)
 
-        if (gameState === 0) {
-            // reset
-        }
-        if (gameState === 1) {
+        if (gameState === 'over') {
+            game.reset()
             game.start()
             gameLoop()
         }
-        if (gameState === 2) {
-            // pause
+        if (gameState === 'ready') {
+            game.start()
+            gameLoop()
         }
-        if (gameState === 3) {
-            // resume
+        if (gameState === 'in-progress') {
+            game.pause()
+            cancelAnimationFrame(requestId)
+            requestId = null
+        }
+        if (gameState === 'paused') {
+            game.resume()
+            gameLoop()
         }
     })
-
-    // attach event listeners
-    // document.addEventListener('keydown', event => )
-
-    // document.addEventListener('click', event => {
-    //     console.log(event.target);
-    // })
-
-    /* // get play button
-    const playBtn = document.getElementsByClassName('play')[0]
-    if (playBtn) {
-        playBtn.addEventListener('click', function onPlayClicked() {
-            if (gameOver) {
-                game.reset()
-                this.innerHTML = 'Play'
-
-                gameScore = 0
-                const b = game.drawBoard()
-                root.getElementsByClassName('grid')[0].outerHTML = b
-                // refresh score
-                root.getElementsByClassName('score-value')[0].innerHTML = gameScore
-
-                gameOver = !gameOver
-
-                return
-            }
-
-            // update current and next piece
-            game.updatePieces()
-
-            // refresh board
-            const b = game.drawBoard()
-            root.getElementsByClassName('grid')[0].outerHTML = b
-
-            // get next piece and draw it on the side
-            const nextPieceHTML = game.drawNextPiece()
-            root.getElementsByClassName('nextPiece')[0].innerHTML = nextPieceHTML
-
-            // dely game loop with 1 second
-            setTimeout(gameLoop, 1000)
-        })
-    } */
 }
