@@ -1,0 +1,136 @@
+html {
+    /* Will be overridden by JS */
+    --number-of-rows: 20;
+    --number-of-columns: 10;
+
+    --s-piece-length: 2;
+    --m-piece-length: 3;
+    --l-piece-length: 4;
+
+    font-family: 'Press Start 2P';
+}
+
+.tetris {
+    width: 50%;
+    margin: 0 auto;
+    display: flex;
+}
+
+.board {
+    outline: 2px solid;
+    display: inline-block;
+}
+
+.grid {
+    box-sizing: border-box;
+    display: inline-grid;
+    grid-template-columns: repeat(var(--number-of-columns), 1fr);
+    grid-auto-flow: row;
+    gap: 2px;
+}
+.grid-2 {
+    box-sizing: border-box;
+    display: inline-grid;
+    grid-template-columns: repeat(var(--s-piece-length), 1fr);
+    grid-auto-flow: row;
+    gap: 2px;
+}
+.grid-3 {
+    box-sizing: border-box;
+    display: inline-grid;
+    grid-template-columns: repeat(var(--m-piece-length), 1fr);
+    grid-auto-flow: row;
+    gap: 2px;
+}
+.grid-4 {
+    box-sizing: border-box;
+    display: inline-grid;
+    grid-template-columns: repeat(var(--l-piece-length), 1fr);
+    grid-auto-flow: row;
+    gap: 2px;
+}
+
+.cell {
+    display: flex;
+    justify-content: center;
+    align-self: center;
+    box-sizing: border-box;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+/* uncomment this to see an entire piece including empty spaces */
+/* .cell--1 {
+    background-color: rgba(160, 207, 250, 0.575);
+    opacity: 0.75;
+} */
+.cell-0 {
+    background-color: white;
+}
+.cell-1 {
+    background-color: cyan;
+}
+.cell-2 {
+    background-color: blue;
+}
+.cell-3 {
+    background-color: orange;
+}
+.cell-4 {
+    background-color: yellow;
+}
+.cell-5 {
+    background-color: green;
+}
+.cell-6 {
+    background-color: purple;
+}
+.cell-7 {
+    background-color: red;
+}
+
+.board-info {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    max-width: 25rem;
+}
+.score {
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+.score-value {
+    display: inline-block;
+    padding: 0 0.25rem;
+    font-weight: 700;
+}
+.controls {
+    width: 100%;
+    margin: 1rem auto;
+}
+.nextPiece {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.play {
+    display: block;
+    cursor: pointer;
+    width: 100%;
+    background: none;
+    color: #e44a4a;
+    border: 1px solid #e44a4a;
+    padding: 0.5em 1em;
+    text-align: center;
+    border-radius: 4px;
+    transition: color 150ms ease-in, background-color 150ms ease-in;
+    text-transform: capitalize;
+}
+.play:hover {
+    color: white;
+    background-color: #e44a4a;
+}
+
