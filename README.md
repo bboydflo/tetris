@@ -14,3 +14,14 @@ npm i && npm start
 ```
 
 Then head on to [localhost:8080](localhost:8080)
+
+## Credits
+
+1. [how to use requestAnimationFrame with react hooks](https://css-tricks.com/using-requestanimationframe-with-react-hooks/)
+2. [use event listener hook](https://usehooks.com/useEventListener/)
+
+## Check more awesome hoooks
+
+1. [hooks guide](https://hooks-guide.netlify.app/)
+2. [use hooks](https://usehooks.com/)
+3. [awesome react hooks](https://github.com/rehooks/awesome-react-hooks)
