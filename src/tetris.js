@@ -3,6 +3,7 @@ import { Piece, rotatePiece } from './piece'
 
 export class Tetris {
     constructor(rows, columns) {
+        console.log(this)
         this.rows = rows
         this.columns = columns
         this.reset()
@@ -25,6 +26,7 @@ export class Tetris {
     }
 
     start() {
+        console.log(this)
         this.piece = this.nextPiece
         this.nextPiece = new Piece({
             x: this.columns / 2 - 1,
@@ -94,7 +96,7 @@ export class Tetris {
                 break
             case KEY.SPACE:
                 let isValidState = true
-                while((this.isValidPosition(p))) {
+                while ((this.isValidPosition(p))) {
                     this.score += POINTS.HARD_DROP
                     p.y += 1
                     isValidState = false
@@ -204,9 +206,9 @@ const POINTS = {
     HARD_DROP: 2,
 }
 
-const getPoints = (numberOfLines, level = 1)  => {
+const getPoints = (numberOfLines, level = 1) => {
     let points = 0
-    switch(numberOfLines) {
+    switch (numberOfLines) {
         case 1:
             points = POINTS.SINGLE
             break
