@@ -8,7 +8,7 @@ document.documentElement.style.setProperty('--number-of-rows', ROWS)
 document.documentElement.style.setProperty('--number-of-columns', COLS)
 
 const game = new Tetris(ROWS, COLS)
-const root = document.getElementById('root')
+const root = document.querySelector('#root')
 
 let requestId = 0
 let startTime = performance.now()
@@ -30,33 +30,32 @@ const tetrisTemplate = (state) => {
         <div class="tetris">
             <div class="board">
                 <div class="grid">
-                ${
-                    grid
-                        .map((rows, rowIndex) => {
-                            return rows
-                                .map((v, colIndex) => {
+                ${grid
+            .map((rows, rowIndex) => {
+                return rows
+                    .map((v, colIndex) => {
 
-                                    // does piece exist and it is in the viewport?
-                                    if (currentPiece && currentPiece.y >= 0) {
+                        // does piece exist and it is in the viewport?
+                        if (currentPiece && currentPiece.y >= 0) {
 
-                                        const innerX = colIndex - currentPiece.x
-                                        const innerY = rowIndex - currentPiece.y
+                            const innerX = colIndex - currentPiece.x
+                            const innerY = rowIndex - currentPiece.y
 
-                                        // limits
-                                        if (innerX >= 0 && innerY >= 0 && innerX < currentPiece.shape.length && innerY < currentPiece.shape.length) {
-                                            if (currentPiece.shape[innerY][innerX] > 0) {
-                                                v = currentPiece.shape[innerY][innerX]
-                                            }
-                                        }
-                                    }
+                            // limits
+                            if (innerX >= 0 && innerY >= 0 && innerX < currentPiece.shape.length && innerY < currentPiece.shape.length) {
+                                if (currentPiece.shape[innerY][innerX] > 0) {
+                                    v = currentPiece.shape[innerY][innerX]
+                                }
+                            }
+                        }
 
-                                    // return `<span class="cell cell-${v}"></span>`
-                                    return `<span class="cell cell-${v} row-${rowIndex} col-${colIndex}"></span>`
-                                })
-                                .join('')
-                        })
-                        .join('')
-                }
+                        // return `<span class="cell cell-${v}"></span>`
+                        return `<span class="cell cell-${v} row-${rowIndex} col-${colIndex}"></span>`
+                    })
+                    .join('')
+            })
+            .join('')
+        }
                 </div>
             </div>
             <div class="board-info">
@@ -65,16 +64,15 @@ const tetrisTemplate = (state) => {
                     <button class="play">${playBtnLabel}</button>
                 </div>
                 <div class="nextPiece">
-                    <div class="grid-${nextPiece.shape.length}">${
-                        nextPiece.shape
-                            .map((rows, rowIndex) => {
-                                return rows
-                                    .map((v, colIndex) => {
-                                        return `<span class="cell cell-${v} row-${rowIndex} col-${colIndex}"></span>`
-                                    })
-                                    .join('')
-                            })
-                            .join('')}
+                    <div class="grid-${nextPiece.shape.length}">${nextPiece.shape
+            .map((rows, rowIndex) => {
+                return rows
+                    .map((v, colIndex) => {
+                        return `<span class="cell cell-${v} row-${rowIndex} col-${colIndex}"></span>`
+                    })
+                    .join('')
+            })
+            .join('')}
                     </div>
                 </div>
             </div>
@@ -120,7 +118,7 @@ if (root) {
     render(root, game)
 
     // setup event handlers
-    delegate('keydown', 'body', function(event) {
+    delegate('keydown', 'body', function (event) {
         const { isGameOver, gameState } = game.getState()
         if (gameState === 'over' || isGameOver) {
             return console.log('game is already over')
@@ -156,7 +154,7 @@ if (root) {
             return render(root, game)
         }
     })
-    delegate('click', '.play', function(event) {
+    delegate('click', '.play', function (event) {
         const { gameState } = game.getState()
         console.log('current state ', gameState)
 
