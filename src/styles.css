@@ -113,6 +113,7 @@ html {
 }
 .controls {
     width: 100%;
+    max-width: 10rem;
     margin: 1rem auto;
 }
 .nextPiece {

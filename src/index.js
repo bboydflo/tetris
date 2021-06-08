@@ -162,7 +162,7 @@ const TetrisApp = () => {
     }
 
     return (
-        <div className={`tetris tetris-count${count}`}>
+        <div className='tetris'>
             <div className='board'>
                 <div className='grid'>
                     {
