@@ -7,7 +7,7 @@ import useEventListener from './use-event-listener'
 import './styles.css'
 
 const TetrisApp = () => {
-    const [count, setCount] = useState(0)
+    const [_, setCount] = useState(0)
     const gameRef = useRef()
 
     // Use useRef for mutable variables that we want to persist
