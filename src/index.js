@@ -25,7 +25,7 @@ const TetrisApp = () => {
         playBtnLabel = 'Resume'
     }
     if (gameState === 'over') {
-        playBtnLabel = 'Reset'
+        playBtnLabel = 'Restart'
     }
 
     return (

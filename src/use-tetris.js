@@ -28,9 +28,9 @@ export function useTetris() {
     const pauseGame = () => {
         const game = gameRef.current
         if (game) {
-            game.pause()
             cancelAnimationFrame(requestRef.current)
             requestRef.current = null
+            game.pause()
         }
     }
     const resumeGame = () => {
@@ -132,19 +132,20 @@ export function useTetris() {
             return console.log('game is already over')
         }
         if (event.keyCode === KEY.P) {
-            if (!requestRef.current) {
-                game.resume()
-                requestRef.current = animate(0)
-            } else {
-                cancelAnimationFrame(requestRef.current)
-                requestRef.current = null
-                game.pause()
+            if (gameState === 'ready') {
+                startGame()
+            }
+            if (gameState === 'paused') {
+                resumeGame()
+            }
+            if (gameState === 'in-progress') {
+                pauseGame()
             }
 
             return forceUpdate()
         }
         if (event.keyCode === KEY.ESC) {
-            game.reset()
+            resetGame()
             // game.over()
             cancelAnimationFrame(requestRef.current)
             requestRef.current = null
@@ -156,10 +157,12 @@ export function useTetris() {
             return console.log('game is paused')
         }
 
-        const nextPosition = game.getNextPosition(event.keyCode)
-        if (event.keyCode === KEY.SPACE || game.isValidPosition(nextPosition)) {
-            game.movePiece(nextPosition)
-            return forceUpdate()
+        if (gameState === 'in-progress') {
+            const nextPosition = game.getNextPosition(event.keyCode)
+            if (event.keyCode === KEY.SPACE || game.isValidPosition(nextPosition)) {
+                game.movePiece(nextPosition)
+                return forceUpdate()
+            }
         }
     }, document.body)
 
