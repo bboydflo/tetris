@@ -6,7 +6,7 @@ import { useTetris } from './use-tetris'
 
 import './styles.css'
 
-const TetrisApp = () => {
+const TetrisApp: React.FC = () => {
     const {
         tetrisState,
         handlePlay
