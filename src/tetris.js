@@ -3,7 +3,6 @@ import { Piece, rotatePiece } from './piece'
 
 export class Tetris {
     constructor(rows, columns) {
-        console.log(this)
         this.rows = rows
         this.columns = columns
         this.reset()
@@ -26,7 +25,6 @@ export class Tetris {
     }
 
     start() {
-        console.log(this)
         this.piece = this.nextPiece
         this.nextPiece = new Piece({
             x: this.columns / 2 - 1,
