@@ -129,6 +129,7 @@ export function useTetris() {
         const { isGameOver, gameState } = game.getState()
 
         if (gameState === 'over' || isGameOver) {
+            // TODO: add better warning
             return console.log('game is already over')
         }
         if (event.keyCode === KEY.P) {
@@ -154,6 +155,7 @@ export function useTetris() {
         }
 
         if (gameState === 'paused') {
+            // TODO: add better warning
             return console.log('game is paused')
         }
 

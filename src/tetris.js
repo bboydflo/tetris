@@ -122,19 +122,29 @@ export class Tetris {
 
                 // non empty shape value needs to be within the walls
                 if (value > 0 && (x < 0 || x >= this.columns)) {
-                    console.warn(`(${y}, ${x}) is not within the walls`)
+
+                    // PRODUCTION is globally defined by webpack at build time
+                    if (!PRODUCTION) {
+                        console.warn(`(${y}, ${x}) is not within the walls`)
+                    }
                     return false
                 }
 
                 // non empty shape value needs to be above the floor
                 if (value > 0 && y >= this.rows) {
-                    console.warn(`(${y}, ${x}) not above the floor`)
+                    // PRODUCTION is globally defined by webpack at build time
+                    if (!PRODUCTION) {
+                        console.warn(`(${y}, ${x}) not above the floor`)
+                    }
                     return false
                 }
 
                 // non empty shape value needs to fill in an empty spot in the grid
                 if (value > 0 && this.grid[y] && this.grid[y][x] > 0) {
-                    console.warn(`point (${y}, ${x}) is already filed with value ${this.grid[y][x]}`)
+                    // PRODUCTION is globally defined by webpack at build time
+                    if (!PRODUCTION) {
+                        console.warn(`point (${y}, ${x}) is already filed with value ${this.grid[y][x]}`)
+                    }
                     return false
                 }
 

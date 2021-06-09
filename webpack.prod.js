@@ -1,3 +1,4 @@
+const webpack = require('webpack')
 const { ESBuildMinifyPlugin } = require('esbuild-loader')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const { merge } = require('webpack-merge')
@@ -13,7 +14,12 @@ module.exports = merge(common.config, {
             },
         ],
     },
-    plugins: [new MiniCssExtractPlugin()],
+    plugins: [
+        new webpack.DefinePlugin({
+            PRODUCTION: JSON.stringify(true),
+        }),
+        new MiniCssExtractPlugin()
+    ],
     optimization: {
         minimizer: [
             new ESBuildMinifyPlugin({
