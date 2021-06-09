@@ -1,4 +1,5 @@
 const path = require('path')
+const CopyPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const dist = path.resolve(__dirname, 'dist')
@@ -37,6 +38,11 @@ module.exports = {
             extensions: ['.ts', '.js', '.json']
         },
         plugins: [
+            new CopyPlugin({
+                patterns: [
+                    { from: 'src/assets/favicons', to: 'favicons' }
+                ],
+            }),
             new HtmlWebpackPlugin({
                 title: 'Tetris',
                 template: './index.html'
