@@ -5,7 +5,7 @@ const dist = path.resolve(__dirname, 'dist')
 
 module.exports = {
     config: {
-        entry: './src/index.js',
+        entry: './src/index.tsx',
         module: {
             rules: [
                 {
@@ -24,14 +24,17 @@ module.exports = {
                     type: 'asset/resource',
                 },
                 {
-                    test: /\.js$/,
+                    test: /\.tsx?$/,
                     loader: 'esbuild-loader',
                     options: {
-                        loader: 'jsx',  // Remove this if you're not using JSX
+                        loader: 'tsx',  // Remove this if you're not using JSX
                         target: 'es2020'  // Syntax to compile to (see options below for possible values)
                     }
                 },
             ],
+        },
+        resolve: {
+            extensions: ['.ts', '.js', '.json']
         },
         plugins: [
             new HtmlWebpackPlugin({

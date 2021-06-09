@@ -1,15 +1,29 @@
-import { KEY, ROTATION } from './constants'
+import { Key, Directions } from './constants'
 import { Piece, rotatePiece } from './piece'
 
+export enum GameState {
+    READY = 'ready',
+    IN_PROGRESS = 'in-progress',
+    PAUSED = 'paused',
+    RESET = 'reset',
+    GAME_OVER = 'over'
+}
+
 export class Tetris {
-    constructor(rows, columns) {
-        this.rows = rows
-        this.columns = columns
+    private grid: number[][] = []
+    private score: number = 0
+    private piece: Piece | null = null
+    private nextPiece: Piece = new Piece({ x: 0, y: 0 })
+    private gameState: GameState = GameState.READY
+
+    constructor(public rows: number, public columns: number) {
+        // this.rows = rows
+        // this.columns = columns
         this.reset()
     }
 
     getEmptyBoard() {
-        return Array.from({ length: this.rows }, () => Array(this.columns).fill(0))
+        return Array.from({ length: this.rows }, () => Array(this.columns).fill(0) as number[])
     }
 
     reset() {
@@ -20,8 +34,7 @@ export class Tetris {
         })
         this.grid = this.getEmptyBoard()
         this.score = 0
-        // ready | in-progress | paused | over
-        this.gameState = 'ready'
+        this.gameState = GameState.READY
     }
 
     start() {
@@ -30,19 +43,19 @@ export class Tetris {
             x: this.columns / 2 - 1,
             y: -1
         })
-        this.gameState = 'in-progress'
+        this.gameState = GameState.IN_PROGRESS
     }
 
     pause() {
-        this.gameState = 'paused'
+        this.gameState = GameState.PAUSED
     }
 
     resume() {
-        this.gameState = 'in-progress'
+        this.gameState = GameState.IN_PROGRESS
     }
 
     over() {
-        this.gameState = 'over'
+        this.gameState = GameState.GAME_OVER
     }
 
     getState() {
@@ -74,25 +87,25 @@ export class Tetris {
         }
     }
 
-    getNextPosition(key) {
-        let p = this.piece.clone()
+    getNextPosition(key: Key) {
+        let p = this.piece!.clone()
         switch (key) {
-            case KEY.UP:
-                p = rotatePiece(p, ROTATION.RIGHT)
+            case Key.UP:
+                p = rotatePiece(p, Directions.RIGHT)
                 break
-            case KEY.Q:
-                p = rotatePiece(p, ROTATION.LEFT)
+            case Key.Q:
+                p = rotatePiece(p, Directions.LEFT)
                 break
-            case KEY.DOWN:
+            case Key.DOWN:
                 p.y += 1
                 break
-            case KEY.RIGHT:
+            case Key.RIGHT:
                 p.x = p.x + 1
                 break
-            case KEY.LEFT:
+            case Key.LEFT:
                 p.x = p.x - 1
                 break
-            case KEY.SPACE:
+            case Key.SPACE:
                 let isValidState = true
                 while ((this.isValidPosition(p))) {
                     this.score += POINTS.HARD_DROP
@@ -107,7 +120,7 @@ export class Tetris {
         return p
     }
 
-    isValidPosition(p) {
+    isValidPosition(p: Piece) {
 
         /**
          * every point of the shape needs to within the walls
@@ -153,17 +166,17 @@ export class Tetris {
         })
     }
 
-    movePiece(p) {
-        this.piece.x = p.x
-        this.piece.y = p.y
-        this.piece.shape = p.shape
+    movePiece(p: Piece) {
+        this.piece!.x = p.x
+        this.piece!.y = p.y
+        this.piece!.shape = p.shape
     }
 
     setCurrentPiece() {
-        this.piece.shape.map((row, rowIndex) => {
+        this.piece!.shape.map((row, rowIndex) => {
             row.map((value, colIndex) => {
                 if (value >= 0) {
-                    this.grid[this.piece.y + rowIndex][this.piece.x + colIndex] = value
+                    this.grid[this.piece!.y + rowIndex][this.piece!.x + colIndex] = value
                 }
             })
         })
@@ -188,7 +201,7 @@ export class Tetris {
                 this.grid.splice(rowIndex, 1)
 
                 // add new empty line at the beginning
-                this.grid.unshift(Array.from({ length: this.columns }).fill(0))
+                this.grid.unshift(Array.from({ length: this.columns }).fill(0) as number[])
             }
         })
 
@@ -196,12 +209,12 @@ export class Tetris {
     }
 
     isGameOver() {
-        return this.piece.y === 0
+        return this.piece!.y === 0
     }
 
     exitGame() {
         this.reset()
-        this.gameState = 'reset'
+        this.gameState = GameState.RESET
     }
 }
 
@@ -214,7 +227,7 @@ const POINTS = {
     HARD_DROP: 2,
 }
 
-const getPoints = (numberOfLines, level = 1) => {
+const getPoints = (numberOfLines: number, level = 1) => {
     let points = 0
     switch (numberOfLines) {
         case 1:

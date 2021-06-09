@@ -1,68 +1,48 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { KEY, ROWS, COLS } from './constants'
-import { Tetris } from './tetris'
+import { Key, ROWS, COLS } from './constants'
+import { GameState, Tetris } from './tetris'
 import useEventListener from './use-event-listener'
 
 export function useTetris() {
     const [_, setCount] = useState(0)
-    const gameRef = useRef()
-    const requestRef = useRef()
+    const gameRef = useRef(new Tetris(ROWS, COLS))
+    const requestRef = useRef(0)
     const previousTimeRef = useRef(performance.now())
-
-    let tetrisState
-    if (gameRef.current && typeof gameRef.current.getState === 'function') {
-        tetrisState = gameRef.current.getState()
-    }
 
     const forceUpdate = () => {
         setCount(prevCount => (prevCount + 1) % 100)
     }
 
     const startGame = () => {
-        const game = gameRef.current
-        if (game) {
-            game.start()
-        }
+        gameRef.current.start()
     }
     const pauseGame = () => {
-        const game = gameRef.current
-        if (game) {
-            cancelAnimationFrame(requestRef.current)
-            requestRef.current = null
-            game.pause()
-        }
+        cancelAnimationFrame(requestRef.current)
+        requestRef.current = 0
+        gameRef.current.pause()
     }
     const resumeGame = () => {
-        const game = gameRef.current
-        if (game) {
-            game.resume()
-            requestRef.current = animate(0)
-        }
+        gameRef.current.resume()
+        requestRef.current = animate(0)
     }
     const resetGame = () => {
-        const game = gameRef.current
-        if (game) {
-            game.reset()
-        }
+        gameRef.current.reset()
     }
     const restartGame = () => {
-        const game = gameRef.current
-        if (game) {
-            resetGame()
-            startGame()
-        }
+        resetGame()
+        startGame()
     }
 
-    const animate = time => {
+    const animate = (time: number) => {
         if (time - previousTimeRef.current >= 1000) {
             const game = gameRef.current
             const { gameState } = game.getState()
 
             previousTimeRef.current = time
 
-            if (gameState === 'in-progress') {
-                const nextPosition = game.getNextPosition(KEY.DOWN)
+            if (gameState === GameState.IN_PROGRESS) {
+                const nextPosition = game.getNextPosition(Key.DOWN)
                 if (game.isValidPosition(nextPosition)) {
                     game.movePiece(nextPosition)
                 } else {
@@ -73,7 +53,7 @@ export function useTetris() {
                     if (game.isGameOver()) {
                         game.over()
                         cancelAnimationFrame(requestRef.current)
-                        requestRef.current = null
+                        requestRef.current = 0
                     } else {
 
                         // update current and next piece
@@ -89,25 +69,24 @@ export function useTetris() {
     }
 
     const handlePlay = () => {
-        const game = gameRef.current
-        const { gameState } = game.getState()
+        const { gameState } = gameRef.current.getState()
 
-        if (gameState === 'over') {
+        if (gameState === GameState.GAME_OVER) {
             restartGame()
         }
-        if (gameState === 'ready') {
+        if (gameState === GameState.READY) {
             startGame()
         }
-        if (gameState === 'in-progress') {
+        if (gameState === GameState.IN_PROGRESS) {
             pauseGame()
         }
-        if (gameState === 'paused') {
+        if (gameState === GameState.PAUSED) {
             resumeGame()
         }
     }
 
     useEffect(function gameLoop() {
-        gameRef.current = new Tetris(ROWS, COLS)
+        // start game loop
         requestRef.current = animate(0)
 
         // initial update
@@ -115,58 +94,62 @@ export function useTetris() {
 
         return () => {
             cancelAnimationFrame(requestRef.current)
-            requestRef.current = null
+            requestRef.current = 0
 
             gameRef.current.reset()
-            gameRef.current = null
+            gameRef.current = new Tetris(ROWS, COLS)
 
-            previousTimeRef.current = null
+            previousTimeRef.current = 0
         }
     }, [])
 
     useEventListener('keydown', function handleKeyDownEvents(event) {
         const game = gameRef.current
-        const { isGameOver, gameState } = game.getState()
+        const { gameState } = game.getState()
 
-        if (gameState === 'over' || isGameOver) {
+        if (gameState === GameState.GAME_OVER) {
+
             // TODO: add better warning
             return console.log('game is already over')
         }
-        if (event.keyCode === KEY.P) {
-            if (gameState === 'ready') {
+        if (event.keyCode === Key.P) {
+            if (gameState === GameState.READY) {
                 startGame()
             }
-            if (gameState === 'paused') {
+            if (gameState === GameState.PAUSED) {
                 resumeGame()
             }
-            if (gameState === 'in-progress') {
+            if (gameState === GameState.IN_PROGRESS) {
                 pauseGame()
             }
 
             return forceUpdate()
         }
-        if (event.keyCode === KEY.ESC) {
+        if (event.keyCode === Key.ESC) {
+            cancelAnimationFrame(requestRef.current)
+            requestRef.current = 0
+
             resetGame()
             // game.over()
-            cancelAnimationFrame(requestRef.current)
-            requestRef.current = null
 
             return forceUpdate()
         }
 
-        if (gameState === 'paused') {
+        if (gameState === GameState.PAUSED) {
             // TODO: add better warning
             return console.log('game is paused')
         }
 
-        if (gameState === 'in-progress') {
+        if (gameState === GameState.IN_PROGRESS) {
             const nextPosition = game.getNextPosition(event.keyCode)
-            if (event.keyCode === KEY.SPACE || game.isValidPosition(nextPosition)) {
+            if (event.keyCode === Key.SPACE || game.isValidPosition(nextPosition)) {
                 game.movePiece(nextPosition)
                 return forceUpdate()
             }
         }
     }, document.body)
+
+    const tetrisState = gameRef.current.getState()
 
     return {
         tetrisState,

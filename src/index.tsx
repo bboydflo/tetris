@@ -1,6 +1,7 @@
 import React from 'react'
 import { render } from 'react-dom'
 
+import { GameState } from './tetris'
 import { useTetris } from './use-tetris'
 
 import './styles.css'
@@ -18,13 +19,13 @@ const TetrisApp = () => {
     const { score, grid, currentPiece, nextPiece, gameState } = tetrisState || {}
 
     let playBtnLabel = 'Play'
-    if (gameState === 'in-progress') {
+    if (gameState === GameState.IN_PROGRESS) {
         playBtnLabel = 'Pause'
     }
-    if (gameState === 'paused') {
+    if (gameState === GameState.PAUSED) {
         playBtnLabel = 'Resume'
     }
-    if (gameState === 'over') {
+    if (gameState === GameState.GAME_OVER) {
         playBtnLabel = 'Restart'
     }
 
@@ -64,7 +65,7 @@ const TetrisApp = () => {
                 <div className='controls'>
                     <button className='play' onClick={handlePlay}>{playBtnLabel}</button>
                 </div>
-                {nextPiece && <div className='nextPiece'>
+                <div className='nextPiece'>
                     <div className={`grid-${nextPiece.shape.length}`}>
                         {
                             nextPiece.shape
@@ -76,7 +77,7 @@ const TetrisApp = () => {
                                 })
                         }
                     </div>
-                </div>}
+                </div>
             </div>
         </div >
     )
