@@ -15,6 +15,14 @@ npm i && npm start
 
 Then head on to [localhost:8080](localhost:8080)
 
+## Deployment
+
+```sh
+git push
+```
+
+Netlify is setup to listen to changes on master. Whenever a change occurs in master, netlify will build the project (`npm run build`) and deploy the contents of the `dist` folder
+
 ## Credits
 
 1. [how to use requestAnimationFrame with react hooks](https://css-tricks.com/using-requestanimationframe-with-react-hooks/)

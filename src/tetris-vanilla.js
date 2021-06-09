@@ -90,6 +90,7 @@ const gameLoop = (now = 0) => {
             game.updateScore()
 
             if (game.isGameOver()) {
+                game.over()
                 cancelAnimationFrame(requestId)
                 requestId = null
             } else {

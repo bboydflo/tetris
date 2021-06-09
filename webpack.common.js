@@ -1,10 +1,10 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-module.exports = (env) => {
-    console.log(env)
-    return {
-        mode: env.mode || 'development',
+const dist = path.resolve(__dirname, 'dist')
+
+module.exports = {
+    config: {
         entry: './src/index.js',
         module: {
             rules: [
@@ -33,11 +33,6 @@ module.exports = (env) => {
                 },
             ],
         },
-        devtool: 'inline-source-map',
-        devServer: {
-            contentBase: path.join(__dirname, 'dist'),
-            hot: true
-        },
         plugins: [
             new HtmlWebpackPlugin({
                 title: 'Tetris',
@@ -46,8 +41,9 @@ module.exports = (env) => {
         ],
         output: {
             filename: 'main.js',
-            path: path.resolve(__dirname, 'dist'),
+            path: dist,
             clean: true
-        },
-    }
+        }
+    },
+    dist
 }

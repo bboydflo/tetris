@@ -4,8 +4,9 @@
   "description": "## Resources",
   "main": "index.js",
   "scripts": {
-    "start": "webpack serve --open",
-    "build": "webpack"
+    "start": "webpack serve --open --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js",
+    "analyze": ""
   },
   "repository": {
     "type": "git",
@@ -22,10 +23,12 @@
     "css-loader": "5.2.6",
     "esbuild-loader": "2.13.1",
     "html-webpack-plugin": "5.3.1",
+    "mini-css-extract-plugin": "1.6.0",
     "style-loader": "2.0.0",
     "webpack": "5.38.1",
     "webpack-cli": "4.7.2",
-    "webpack-dev-server": "3.11.2"
+    "webpack-dev-server": "3.11.2",
+    "webpack-merge": "5.8.0"
   },
   "dependencies": {
     "react": "17.0.2",

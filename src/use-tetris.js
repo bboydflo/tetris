@@ -15,39 +15,6 @@ export function useTetris() {
         tetrisState = gameRef.current.getState()
     }
 
-    const animate = time => {
-        if (time - previousTimeRef.current >= 1000) {
-            const game = gameRef.current
-            const { gameState } = game.getState()
-
-            previousTimeRef.current = time
-
-            if (gameState === 'in-progress') {
-                const nextPosition = game.getNextPosition(KEY.DOWN)
-                if (game.isValidPosition(nextPosition)) {
-                    game.movePiece(nextPosition)
-                } else {
-                    game.setCurrentPiece()
-
-                    game.updateScore()
-
-                    if (game.isGameOver()) {
-                        cancelAnimationFrame(requestId)
-                        requestId = null
-                    } else {
-
-                        // update current and next piece
-                        game.updatePieces()
-                    }
-                }
-            }
-
-            forceUpdate()
-        }
-
-        return requestAnimationFrame(animate)
-    }
-
     const forceUpdate = () => {
         setCount(prevCount => (prevCount + 1) % 100)
     }
@@ -85,6 +52,40 @@ export function useTetris() {
             resetGame()
             startGame()
         }
+    }
+
+    const animate = time => {
+        if (time - previousTimeRef.current >= 1000) {
+            const game = gameRef.current
+            const { gameState } = game.getState()
+
+            previousTimeRef.current = time
+
+            if (gameState === 'in-progress') {
+                const nextPosition = game.getNextPosition(KEY.DOWN)
+                if (game.isValidPosition(nextPosition)) {
+                    game.movePiece(nextPosition)
+                } else {
+                    game.setCurrentPiece()
+
+                    game.updateScore()
+
+                    if (game.isGameOver()) {
+                        game.over()
+                        cancelAnimationFrame(requestRef.current)
+                        requestRef.current = null
+                    } else {
+
+                        // update current and next piece
+                        game.updatePieces()
+                    }
+                }
+            }
+
+            forceUpdate()
+        }
+
+        return requestAnimationFrame(animate)
     }
 
     const handlePlay = () => {
