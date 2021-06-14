@@ -17,8 +17,6 @@ export class Tetris {
     private gameState: GameState = GameState.READY
 
     constructor(public rows: number, public columns: number) {
-        // this.rows = rows
-        // this.columns = columns
         this.reset()
     }
 
