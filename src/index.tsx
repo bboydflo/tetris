@@ -37,7 +37,7 @@ const TetrisApp: React.FC = () => {
                         grid.map((rows, rowIndex) => {
                             return (
                                 rows
-                                    .map((v, colIndex) => {
+                                    .map((column, colIndex) => {
 
                                         // does piece exist and it is in the viewport?
                                         if (currentPiece && currentPiece.y >= 0) {
@@ -48,12 +48,12 @@ const TetrisApp: React.FC = () => {
                                             // limits
                                             if (innerX >= 0 && innerY >= 0 && innerX < currentPiece.shape.length && innerY < currentPiece.shape.length) {
                                                 if (currentPiece.shape[innerY][innerX] > 0) {
-                                                    v = currentPiece.shape[innerY][innerX]
+                                                    column = currentPiece.shape[innerY][innerX]
                                                 }
                                             }
                                         }
 
-                                        return <span className={`cell cell-${v} row-${rowIndex} col-${colIndex}`} key={`row-${rowIndex} - col-${colIndex}`}></span>
+                                        return <span className={`cell cell-${column} row-${rowIndex} col-${colIndex}`} key={`row-${rowIndex} - col-${colIndex}`}></span>
                                     })
                             )
                         })
