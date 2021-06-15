@@ -1,8 +1,6 @@
 import React from 'react'
 import { render } from 'react-dom'
-
-import { GameState } from './tetris'
-import { useTetris } from './use-tetris'
+import { useTetris, GameState } from 'use-tetris'
 import { browserKeyCodeMap } from './constants'
 import useEventListener from './use-event-listener'
 
