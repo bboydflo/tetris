@@ -1,43 +1,41 @@
-import { useEffect, useRef } from 'react'
+import { RefObject, useEffect, useRef } from 'react'
 
-type EventHandler = (event: any) => unknown
-
-/**
- * copied from: https://usehooks.com/useEventListener/
- * @param {string} eventName
- * @param {function} handler
- * @param {HTMLElement} element - default is window
- */
-export default function useEventListener(eventName: string, handler: EventHandler, element: HTMLElement | Window & typeof globalThis = window) {
+// https://usehooks-typescript.com/react-hook/use-event-listener
+function useEventListener<T extends HTMLElement = HTMLDivElement>(
+    eventName: keyof WindowEventMap,
+    handler: (event: Event) => void,
+    element?: RefObject<T>,
+) {
     // Create a ref that stores handler
-    const savedHandler = useRef<EventHandler>()
+    const savedHandler = useRef<(event: Event) => void>()
 
-    // Update ref.current value if handler changes.
-    // This allows our effect below to always get latest handler ...
-    // ... without us needing to pass it in effect deps array ...
-    // ... and potentially cause effect to re-run every render.
     useEffect(() => {
-        savedHandler.current = handler
-    }, [handler])
+        // Define the listening target
+        const targetElement: T | Window = element?.current || window
+        if (!(targetElement && targetElement.addEventListener)) {
+            return
+        }
 
-    useEffect(
-        () => {
-            // Make sure element supports addEventListener
-            // On
-            const isSupported = element && element.addEventListener
-            if (!isSupported) return
+        // Update saved handler if necessary
+        if (savedHandler.current !== handler) {
+            savedHandler.current = handler
+        }
 
-            // Create event listener that calls handler function stored in ref
-            const eventListener = (event: any) => savedHandler.current!(event) // TODO: fix !
+        // Create event listener that calls handler function stored in ref
+        const eventListener = (event: Event) => {
+        // eslint-disable-next-line no-extra-boolean-cast
+        if (!!savedHandler?.current) {
+            savedHandler.current(event)
+        }
+    }
 
-            // Add event listener
-            element.addEventListener(eventName, eventListener)
+        targetElement.addEventListener(eventName, eventListener)
 
-            // Remove event listener on cleanup
-            return () => {
-                element.removeEventListener(eventName, eventListener)
-            }
-        },
-        [eventName, element] // Re-run if eventName or element changes
-    )
+        // Remove event listener on cleanup
+        return () => {
+            targetElement.removeEventListener(eventName, eventListener)
+        }
+    }, [eventName, element, handler])
 }
+
+export default useEventListener

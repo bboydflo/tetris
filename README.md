@@ -32,4 +32,5 @@ Netlify is setup to listen to changes on master. Whenever a change occurs in mas
 
 1. [hooks guide](https://hooks-guide.netlify.app/)
 2. [use hooks](https://usehooks.com/)
-3. [awesome react hooks](https://github.com/rehooks/awesome-react-hooks)
+3. [use hooks ts](https://usehooks-typescript.com/)z
+4. [awesome react hooks](https://github.com/rehooks/awesome-react-hooks)
