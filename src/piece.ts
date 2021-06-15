@@ -1,4 +1,5 @@
 import { Directions, COLORS, SHAPES } from './constants'
+import { klona } from 'klona/json'
 
 interface PieceProperties {
     x: number
@@ -10,12 +11,13 @@ export class Piece {
     public y: number = 0
     public shape: Array<number[]> = []
 
-    constructor({ x, y }: PieceProperties) {
-        this.x = x || 0
-        this.y = y || 0
+    constructor(piece?: PieceProperties, initialShape?: Array<number[]>) {
+        const x = piece ? piece.x : 0
+        const y = piece ? piece.y : 0
+        this.setPosition(x, y)
 
         // this.color = COLORS[this.randomizeTetrominoType()]
-        this.shape = SHAPES[this.randomizeTetrominoType()]
+        this.shape = initialShape || SHAPES[this.randomizeTetrominoType()]
     }
 
     randomizeTetrominoType() {
@@ -28,7 +30,7 @@ export class Piece {
     }
 
     clone() {
-        return JSON.parse(JSON.stringify(this))
+        return new Piece({ x: this.x, y: this.y }, klona(this.shape))
     }
 }
 

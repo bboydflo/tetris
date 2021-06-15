@@ -3,20 +3,26 @@ import { render } from 'react-dom'
 
 import { GameState } from './tetris'
 import { useTetris } from './use-tetris'
+import { browserKeyCodeMap } from './constants'
+import useEventListener from './use-event-listener'
 
 import './styles.css'
 
 const TetrisApp: React.FC = () => {
     const {
         tetrisState,
-        handlePlay
+        handlePlay,
+        handleKey
     } = useTetris()
 
-    if (!tetrisState) {
-        return null
-    }
+    useEventListener('keydown', function(event) {
+        const keycode = (event as KeyboardEvent).keyCode as keyof typeof browserKeyCodeMap
+        const key = browserKeyCodeMap[keycode]
 
-    const { score, grid, currentPiece, nextPiece, gameState } = tetrisState || {}
+        handleKey(key)
+    })
+
+    const { score, grid, piece, nextPiece, gameState } = tetrisState
 
     let playBtnLabel = 'Play'
     if (gameState === GameState.IN_PROGRESS) {
@@ -40,15 +46,15 @@ const TetrisApp: React.FC = () => {
                                     .map((column, colIndex) => {
 
                                         // does piece exist and it is in the viewport?
-                                        if (currentPiece && currentPiece.y >= 0) {
+                                        if (piece && piece.y >= 0) {
 
-                                            const innerX = colIndex - currentPiece.x
-                                            const innerY = rowIndex - currentPiece.y
+                                            const innerX = colIndex - piece.x
+                                            const innerY = rowIndex - piece.y
 
                                             // limits
-                                            if (innerX >= 0 && innerY >= 0 && innerX < currentPiece.shape.length && innerY < currentPiece.shape.length) {
-                                                if (currentPiece.shape[innerY][innerX] > 0) {
-                                                    column = currentPiece.shape[innerY][innerX]
+                                            if (innerX >= 0 && innerY >= 0 && innerX < piece.shape.length && innerY < piece.shape.length) {
+                                                if (piece.shape[innerY][innerX] > 0) {
+                                                    column = piece.shape[innerY][innerX]
                                                 }
                                             }
                                         }

@@ -1,21 +1,32 @@
-export const COLS = 10
-export const ROWS = 20
-
-export enum Key {
-    ESC = 27,
-    SPACE = 32,
-    LEFT = 37,
-    UP = 38,
-    RIGHT = 39,
-    DOWN = 40,
-    P = 80,
-    Q = 81
-}
-
 export enum Directions {
     LEFT = 'left',
     RIGHT = 'right'
 }
+
+export enum Key {
+    ESC = 'ESC',
+    SPACE = 'SPACE#',
+    LEFT = 'LEFT',
+    UP = 'UP',
+    RIGHT = 'RIGHT',
+    DOWN = 'DOWN',
+    P = 'P',
+    Q = 'Q'
+}
+
+export const COLS = 10
+export const ROWS = 20
+
+export const browserKeyCodeMap = {
+    27: Key.ESC,
+    32: Key.SPACE,
+    37: Key.LEFT,
+    38: Key.UP,
+    39: Key.RIGHT,
+    40: Key.DOWN,
+    80: Key.P,
+    81: Key.Q
+} as const
 
 export const COLORS = [
     'cyan',
@@ -29,7 +40,7 @@ export const COLORS = [
 
 export const SHAPES = [
     [
-        [1,   1,  1,  1],
+        [ 1,  1,  1,  1],
         [-1, -1, -1, -1],
         [-1, -1, -1, -1],
         [-1, -1, -1, -1]

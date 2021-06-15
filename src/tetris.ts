@@ -5,80 +5,126 @@ export enum GameState {
     READY = 'ready',
     IN_PROGRESS = 'in-progress',
     PAUSED = 'paused',
-    RESET = 'reset',
-    GAME_OVER = 'over'
+    GAME_OVER = 'game-over'
+}
+
+const POINTS = {
+    SINGLE: 100,
+    DOUBLE: 300,
+    TRIPLE: 500,
+    TETRIS: 800,
+    SOFT_DROP: 1,
+    HARD_DROP: 2,
+}
+
+const getPoints = (numberOfLines: number, level = 1) => {
+    let points = 0
+    switch (numberOfLines) {
+        case 1:
+            points = POINTS.SINGLE
+            break
+        case 2:
+            points = POINTS.DOUBLE
+            break
+        case 3:
+            points = POINTS.TRIPLE
+            break
+        case 4:
+            points = POINTS.TETRIS
+            break
+        default:
+            points = 0
+            break
+    }
+
+    return level * points
+}
+
+const getEmptyBoard = (rows: number, columns: number) => {
+    return Array.from({ length: rows }, () => Array(columns).fill(0) as number[])
+}
+
+export interface TetrisState {
+    grid: number[][],
+    score: number,
+    piece: Piece | null
+    nextPiece: Piece,
+    gameState: GameState
 }
 
 export class Tetris {
-    private grid: number[][] = []
-    private score: number = 0
-    private piece: Piece | null = null
-    private nextPiece: Piece = new Piece({ x: 0, y: 0 })
-    private gameState: GameState = GameState.READY
+    private state: TetrisState = {
+        grid: [],
+        score: 0,
+        piece: null,
+        nextPiece: new Piece(),
+        gameState: GameState.READY
+    }
 
     constructor(public rows: number, public columns: number) {
         this.reset()
     }
 
-    getEmptyBoard() {
-        return Array.from({ length: this.rows }, () => Array(this.columns).fill(0) as number[])
-    }
-
     reset() {
-        this.piece = null
-        this.nextPiece = new Piece({
-            x: this.columns / 2 - 1,
-            y: -1
-        })
-        this.grid = this.getEmptyBoard()
-        this.score = 0
-        this.gameState = GameState.READY
-    }
+        this.state = {
+            grid: getEmptyBoard(this.rows, this.columns),
+            score: 0,
+            piece: null,
 
-    start() {
-        this.piece = this.nextPiece
-        this.nextPiece = new Piece({
-            x: this.columns / 2 - 1,
-            y: -1
-        })
-        this.gameState = GameState.IN_PROGRESS
-    }
-
-    pause() {
-        this.gameState = GameState.PAUSED
-    }
-
-    resume() {
-        this.gameState = GameState.IN_PROGRESS
-    }
-
-    over() {
-        this.gameState = GameState.GAME_OVER
-    }
-
-    getState() {
-        return {
-            grid: this.grid,
-            score: this.score,
-            gameState: this.gameState,
-            currentPiece: this.piece,
-            nextPiece: this.nextPiece
+            // TODO: better intialize x position of the next piece
+            nextPiece: new Piece({
+                x: this.columns / 2 - 1,
+                y: -1
+            }),
+            gameState: GameState.READY,
         }
     }
 
+    start() {
+        const { nextPiece } = this.state
+
+        this.state = {
+            ...this.state,
+            piece: nextPiece,
+
+            // TODO: better intialize x position of the next piece
+            nextPiece: new Piece({
+                x: this.columns / 2 - 1,
+                y: -1
+            }),
+            gameState: GameState.IN_PROGRESS
+        }
+    }
+
+    pause() {
+        this.state.gameState = GameState.PAUSED
+    }
+
+    resume() {
+        this.state.gameState = GameState.IN_PROGRESS
+    }
+
+    over() {
+        this.state.gameState = GameState.GAME_OVER
+    }
+
+    getState() {
+        return this.state
+    }
+
     updatePieces() {
-        if (this.nextPiece) {
-            this.piece = this.nextPiece
-            this.nextPiece = new Piece({
+        if (this.state.nextPiece) {
+            this.state.piece = this.state.nextPiece
+            this.state.nextPiece = new Piece({
                 x: this.columns / 2 - 1,
                 y: 0
             })
         } else {
-            this.piece = new Piece({
+            this.state.piece = new Piece({
                 x: this.columns / 2 - 1,
                 y: 0
             })
-            this.nextPiece = new Piece({
+            this.state.nextPiece = new Piece({
                 x: this.columns / 2 - 1,
                 y: 0
             })
@@ -86,7 +132,7 @@ export class Tetris {
     }
 
     getNextPosition(key: Key) {
-        let p = this.piece!.clone()
+        let p = this.state.piece!.clone()
         switch (key) {
             case Key.UP:
                 p = rotatePiece(p, Directions.RIGHT)
@@ -106,7 +152,7 @@ export class Tetris {
             case Key.SPACE:
                 let isValidState = true
                 while ((this.isValidPosition(p))) {
-                    this.score += POINTS.HARD_DROP
+                    this.state.score += POINTS.HARD_DROP
                     p.y += 1
                     isValidState = false
                 }
@@ -151,10 +197,10 @@ export class Tetris {
                 }
 
                 // non empty shape value needs to fill in an empty spot in the grid
-                if (value > 0 && this.grid[y] && this.grid[y][x] > 0) {
+                if (value > 0 && this.state.grid[y] && this.state.grid[y][x] > 0) {
                     // PRODUCTION is globally defined by webpack at build time
                     if (!PRODUCTION) {
-                        console.warn(`point (${y}, ${x}) is already filed with value ${this.grid[y][x]}`)
+                        console.warn(`point (${y}, ${x}) is already filed with value ${this.state.grid[y][x]}`)
                     }
                     return false
                 }
@@ -165,16 +211,38 @@ export class Tetris {
     }
 
     movePiece(p: Piece) {
-        this.piece!.x = p.x
-        this.piece!.y = p.y
-        this.piece!.shape = p.shape
+        this.state.piece!.x = p.x
+        this.state.piece!.y = p.y
+        this.state.piece!.shape = p.shape
+    }
+
+    tick(onGameOver: () => void) {
+        if (this.state.gameState === GameState.IN_PROGRESS) {
+            const nextPosition = this.getNextPosition(Key.DOWN)
+            if (this.isValidPosition(nextPosition)) {
+                this.movePiece(nextPosition)
+            } else {
+                this.setCurrentPiece()
+
+                this.updateScore()
+
+                if (this.isGameOver()) {
+                    this.over()
+                    onGameOver()
+                } else {
+
+                    // update current and next piece
+                    this.updatePieces()
+                }
+            }
+        }
     }
 
     setCurrentPiece() {
-        this.piece!.shape.map((row, rowIndex) => {
+        this.state.piece!.shape.map((row, rowIndex) => {
             row.map((value, colIndex) => {
                 if (value >= 0) {
-                    this.grid[this.piece!.y + rowIndex][this.piece!.x + colIndex] = value
+                    this.state.grid[this.state.piece!.y + rowIndex][this.state.piece!.x + colIndex] = value
                 }
             })
         })
@@ -182,7 +250,7 @@ export class Tetris {
 
     updateScore() {
         const clearedLines = this.clearLines()
-        this.score += getPoints(clearedLines)
+        this.state.score += getPoints(clearedLines)
     }
 
     clearLines() {
@@ -191,15 +259,15 @@ export class Tetris {
         /**
          * clear all lines that have all values > 0
          */
-        this.grid.forEach((row, rowIndex) => {
+        this.state.grid.forEach((row, rowIndex) => {
             if (row.every(value => value > 0)) {
                 lines += 1
 
                 // clear the line
-                this.grid.splice(rowIndex, 1)
+                this.state.grid.splice(rowIndex, 1)
 
                 // add new empty line at the beginning
-                this.grid.unshift(Array.from({ length: this.columns }).fill(0) as number[])
+                this.state.grid.unshift(Array.from({ length: this.columns }).fill(0) as number[])
             }
         })
 
@@ -207,43 +275,6 @@ export class Tetris {
     }
 
     isGameOver() {
-        return this.piece!.y === 0
+        return this.state.piece!.y === 0
     }
-
-    exitGame() {
-        this.reset()
-        this.gameState = GameState.RESET
-    }
-}
-
-const POINTS = {
-    SINGLE: 100,
-    DOUBLE: 300,
-    TRIPLE: 500,
-    TETRIS: 800,
-    SOFT_DROP: 1,
-    HARD_DROP: 2,
-}
-
-const getPoints = (numberOfLines: number, level = 1) => {
-    let points = 0
-    switch (numberOfLines) {
-        case 1:
-            points = POINTS.SINGLE
-            break
-        case 2:
-            points = POINTS.DOUBLE
-            break
-        case 3:
-            points = POINTS.TRIPLE
-            break
-        case 4:
-            points = POINTS.TETRIS
-            break
-        default:
-            points = 0
-            break
-    }
-
-    return level * points
 }
